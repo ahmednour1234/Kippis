@@ -43,7 +43,7 @@ class CustomerAuthService
 
         // Generate and send OTP
         $otpRecord = $this->otpService->createOtp($customer, 'verification');
-        $this->otpService->sendOtp($customer->email, $otpRecord->otp);
+        $this->otpService->sendOtp($customer->email, $otpRecord->otp, 'verification');
 
         return $customer;
     }
@@ -124,7 +124,29 @@ class CustomerAuthService
 
         // Generate and send OTP
         $otpRecord = $this->otpService->createOtp($customer, 'password_reset');
-        $this->otpService->sendOtp($customer->email, $otpRecord->otp);
+        $this->otpService->sendOtp($customer->email, $otpRecord->otp, 'password_reset');
+    }
+
+    /**
+     * Resend OTP to customer.
+     *
+     * @param string $email
+     * @param string $type OTP type (verification, password_reset)
+     * @return void
+     * @throws ApiException
+     */
+    public function resendOtp(string $email, string $type = 'verification'): void
+    {
+        $customer = $this->customerRepository->findByEmail($email);
+
+        if (!$customer) {
+            // Don't reveal if email exists for security
+            return;
+        }
+
+        // Generate and send new OTP
+        $otpRecord = $this->otpService->createOtp($customer, $type);
+        $this->otpService->sendOtp($customer->email, $otpRecord->otp, $type);
     }
 
     /**

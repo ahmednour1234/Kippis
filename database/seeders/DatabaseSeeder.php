@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             DefaultPagesSeeder::class,
             NotificationSeeder::class,
             StoreSeeder::class,
+            ChannelSeeder::class,
         ]);
     }
 }

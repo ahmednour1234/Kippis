@@ -87,6 +87,18 @@ if %errorlevel% equ 0 (
     echo [WARNING] SupportTicketSeeder failed or already seeded
 )
 
+REM Filament setup
+echo.
+echo [INFO] Setting up Filament...
+php artisan filament:clear-cached-components
+echo [SUCCESS] Filament cached components cleared
+
+REM Livewire setup
+echo.
+echo [INFO] Setting up Livewire...
+php artisan livewire:discover
+echo [SUCCESS] Livewire components discovered
+
 REM Create storage link
 echo.
 echo [INFO] Creating storage link...

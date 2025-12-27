@@ -36,6 +36,23 @@ class CustomerOtpRepository
     }
 
     /**
+     * Find OTP by email and type (for resend functionality).
+     *
+     * @param string $email
+     * @param string $type
+     * @return CustomerOtp|null
+     */
+    public function findByEmailAndType(string $email, string $type): ?CustomerOtp
+    {
+        return CustomerOtp::where('email', $email)
+            ->where('type', $type)
+            ->whereNull('verified_at')
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->first();
+    }
+
+    /**
      * Delete OTPs by email and type.
      *
      * @param string $email

@@ -96,6 +96,18 @@ else
     print_warning "SupportTicketSeeder failed or already seeded"
 fi
 
+# Filament setup
+echo ""
+echo "🎨 Setting up Filament..."
+php artisan filament:clear-cached-components
+print_success "Filament cached components cleared"
+
+# Livewire setup
+echo ""
+echo "⚡ Setting up Livewire..."
+php artisan livewire:discover
+print_success "Livewire components discovered"
+
 # Create storage link
 echo ""
 echo "🔗 Creating storage link..."

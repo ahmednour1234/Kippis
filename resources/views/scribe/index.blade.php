@@ -16,6 +16,25 @@
     <link rel="stylesheet"
           href="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/styles/obsidian.min.css">
     <script src="https://unpkg.com/@highlightjs/cdn-assets@11.6.0/highlight.min.js"></script>
+    <script>
+        // Ensure hljs is available globally for tryitout.js
+        if (typeof window.hljs === 'undefined' && typeof hljs !== 'undefined') {
+            window.hljs = hljs;
+        }
+        // Safety wrapper for highlightElement to prevent errors
+        if (typeof window.hljs === 'undefined') {
+            window.hljs = {
+                highlightElement: function() {
+                    // No-op if hljs is not available
+                    return;
+                },
+                highlightAll: function() {
+                    // No-op if hljs is not available
+                    return;
+                }
+            };
+        }
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jets/0.14.1/jets.min.js"></script>
 
@@ -26,7 +45,7 @@
             </style>
 
     <script>
-        var tryItOutBaseUrl = "http://localhost";
+        var tryItOutBaseUrl = "https://kippis.raversys.uk";
         var useCsrf = Boolean();
         var csrfUrl = "/sanctum/csrf-cookie";
     </script>
@@ -138,7 +157,7 @@
     </ul>
 
     <ul class="toc-footer" id="last-updated">
-        <li>Last updated: December 21, 2025</li>
+        <li>Last updated: December 23, 2025</li>
     </ul>
 </div>
 
@@ -147,7 +166,7 @@
     <div class="content">
         <h1 id="introduction">Introduction</h1>
 <aside>
-    <strong>Base URL</strong>: <code>http://localhost</code>
+    <strong>Base URL</strong>: <code>https://kippis.raversys.uk</code>
 </aside>
 <pre><code>This documentation aims to provide all the information you need to work with our API.
 
@@ -174,7 +193,7 @@ You can switch the language used with the tabs at the top right (or from the nav
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/customers/register" \
+    "https://kippis.raversys.uk/api/v1/customers/register" \
     --header "Content-Type: multipart/form-data" \
     --header "Accept: application/json" \
     --form "name=John Doe"\
@@ -184,12 +203,12 @@ You can switch the language used with the tabs at the top right (or from the nav
     --form "birthdate=1990-01-01"\
     --form "password=password123"\
     --form "password_confirmation=password123"\
-    --form "avatar=@C:\Users\ahmednour\AppData\Local\Microsoft\WinGet\Packages\Astronomer.Astro_Microsoft.Winget.Source_8wekyb3d8bbwe\php5179.tmp" </code></pre></div>
+    --form "avatar=@C:\Users\ahmednour\AppData\Local\Microsoft\WinGet\Packages\Astronomer.Astro_Microsoft.Winget.Source_8wekyb3d8bbwe\phpDA1C.tmp" </code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/register"
+    "https://kippis.raversys.uk/api/v1/customers/register"
 );
 
 const headers = {
@@ -392,7 +411,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
                value=""
                data-component="body">
     <br>
-<p>optional Customer avatar image (max 2MB). Example: <code>C:\Users\ahmednour\AppData\Local\Microsoft\WinGet\Packages\Astronomer.Astro_Microsoft.Winget.Source_8wekyb3d8bbwe\php5179.tmp</code></p>
+<p>optional Customer avatar image (max 2MB). Example: <code>C:\Users\ahmednour\AppData\Local\Microsoft\WinGet\Packages\Astronomer.Astro_Microsoft.Winget.Source_8wekyb3d8bbwe\phpDA1C.tmp</code></p>
         </div>
                 <div style=" padding-left: 28px;  clear: unset;">
             <b style="line-height: 2;"><code>password_confirmation</code></b>&nbsp;&nbsp;
@@ -421,7 +440,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/customers/verify" \
+    "https://kippis.raversys.uk/api/v1/customers/verify" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -433,7 +452,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/verify"
+    "https://kippis.raversys.uk/api/v1/customers/verify"
 );
 
 const headers = {
@@ -585,7 +604,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/customers/login" \
+    "https://kippis.raversys.uk/api/v1/customers/login" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -597,7 +616,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/login"
+    "https://kippis.raversys.uk/api/v1/customers/login"
 );
 
 const headers = {
@@ -749,7 +768,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/customers/forgot-password" \
+    "https://kippis.raversys.uk/api/v1/customers/forgot-password" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -760,7 +779,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/forgot-password"
+    "https://kippis.raversys.uk/api/v1/customers/forgot-password"
 );
 
 const headers = {
@@ -891,7 +910,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/customers/reset-password" \
+    "https://kippis.raversys.uk/api/v1/customers/reset-password" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -905,7 +924,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/reset-password"
+    "https://kippis.raversys.uk/api/v1/customers/reset-password"
 );
 
 const headers = {
@@ -1076,7 +1095,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/customers/me" \
+    --get "https://kippis.raversys.uk/api/v1/customers/me" \
     --header "Authorization: Bearer {token} JWT token obtained from login" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1084,7 +1103,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/me"
+    "https://kippis.raversys.uk/api/v1/customers/me"
 );
 
 const headers = {
@@ -1249,7 +1268,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/customers/logout" \
+    "https://kippis.raversys.uk/api/v1/customers/logout" \
     --header "Authorization: Bearer {token} JWT token obtained from login" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1257,7 +1276,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/logout"
+    "https://kippis.raversys.uk/api/v1/customers/logout"
 );
 
 const headers = {
@@ -1398,7 +1417,7 @@ This is useful for extending the session without requiring the customer to login
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/customers/refresh-token" \
+    "https://kippis.raversys.uk/api/v1/customers/refresh-token" \
     --header "Authorization: Bearer {token} JWT token obtained from login" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1406,7 +1425,7 @@ This is useful for extending the session without requiring the customer to login
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/refresh-token"
+    "https://kippis.raversys.uk/api/v1/customers/refresh-token"
 );
 
 const headers = {
@@ -1549,7 +1568,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request DELETE \
-    "http://localhost/api/v1/customers/account" \
+    "https://kippis.raversys.uk/api/v1/customers/account" \
     --header "Authorization: Bearer {token} JWT token obtained from login" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
@@ -1557,7 +1576,7 @@ You can check the Dev Tools console for debugging information.</code></pre>
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/customers/account"
+    "https://kippis.raversys.uk/api/v1/customers/account"
 );
 
 const headers = {
@@ -1704,13 +1723,13 @@ Only stores that are active and receive online orders are returned. Deleted or i
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/stores?latitude=24.7136&amp;longitude=46.6753&amp;sort=nearest&amp;page=1&amp;per_page=15" \
+    --get "https://kippis.raversys.uk/api/v1/stores?latitude=24.7136&amp;longitude=46.6753&amp;sort=nearest&amp;page=1&amp;per_page=15" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
     \"latitude\": 21,
     \"longitude\": 13,
-    \"sort\": \"name\",
+    \"sort\": \"nearest\",
     \"page\": 56,
     \"per_page\": 5
 }"
@@ -1719,7 +1738,7 @@ Only stores that are active and receive online orders are returned. Deleted or i
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/stores"
+    "https://kippis.raversys.uk/api/v1/stores"
 );
 
 const params = {
@@ -1740,7 +1759,7 @@ const headers = {
 let body = {
     "latitude": 21,
     "longitude": 13,
-    "sort": "name",
+    "sort": "nearest",
     "page": 56,
     "per_page": 5
 };
@@ -1987,10 +2006,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="sort"                data-endpoint="GETapi-v1-stores"
-               value="name"
+               value="nearest"
                data-component="body">
     <br>
-<p>Example: <code>name</code></p>
+<p>Example: <code>nearest</code></p>
 Must be one of:
 <ul style="list-style-type: square;"><li><code>nearest</code></li> <li><code>name</code></li></ul>
         </div>
@@ -2222,14 +2241,14 @@ Only active stores that receive online orders can be retrieved. If the store is 
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/stores/1" \
+    --get "https://kippis.raversys.uk/api/v1/stores/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/stores/1"
+    "https://kippis.raversys.uk/api/v1/stores/1"
 );
 
 const headers = {
@@ -2466,7 +2485,7 @@ If you are authenticated, the `name` and `email` fields are optional and will be
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost/api/v1/support-tickets" \
+    "https://kippis.raversys.uk/api/v1/support-tickets" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -2481,7 +2500,7 @@ If you are authenticated, the `name` and `email` fields are optional and will be
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/support-tickets"
+    "https://kippis.raversys.uk/api/v1/support-tickets"
 );
 
 const headers = {
@@ -2800,7 +2819,7 @@ If you are authenticated, you will automatically see only your own tickets. If y
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/support-tickets?status=open&amp;priority=high&amp;email=john%40example.com&amp;page=1&amp;per_page=15" \
+    --get "https://kippis.raversys.uk/api/v1/support-tickets?status=open&amp;priority=high&amp;email=john%40example.com&amp;page=1&amp;per_page=15" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -2814,7 +2833,7 @@ If you are authenticated, you will automatically see only your own tickets. If y
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/support-tickets"
+    "https://kippis.raversys.uk/api/v1/support-tickets"
 );
 
 const params = {
@@ -3322,14 +3341,14 @@ If you are authenticated, you can only view tickets that belong to your account.
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request GET \
-    --get "http://localhost/api/v1/support-tickets/1" \
+    --get "https://kippis.raversys.uk/api/v1/support-tickets/1" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json"</code></pre></div>
 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost/api/v1/support-tickets/1"
+    "https://kippis.raversys.uk/api/v1/support-tickets/1"
 );
 
 const headers = {

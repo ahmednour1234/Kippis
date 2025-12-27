@@ -47,7 +47,20 @@ php artisan db:seed --class=CustomerSeeder
 php artisan db:seed --class=SupportTicketSeeder
 ```
 
-### 4. Storage and Cache
+### 4. Filament and Livewire Setup
+
+```bash
+# Clear Filament cached components
+php artisan filament:clear-cached-components
+
+# Publish Filament assets (if needed)
+php artisan filament:install --panels
+
+# Discover Livewire components
+php artisan livewire:discover
+```
+
+### 5. Storage and Cache
 
 ```bash
 # Create storage link for public access
@@ -69,7 +82,7 @@ php artisan view:cache
 php artisan cache:clear
 ```
 
-### 5. Build Frontend Assets
+### 6. Build Frontend Assets
 
 ```bash
 # Development build
@@ -161,6 +174,55 @@ php artisan filament:clear-cached-components
 
 # Upgrade Filament
 php artisan filament:upgrade
+
+# Install Filament (if not already installed)
+composer require filament/filament:"^4.0" -W
+
+# Publish Filament assets
+php artisan filament:install --panels
+
+# Create a new Filament panel
+php artisan make:filament-panel
+
+# Create a new Filament resource
+php artisan make:filament-resource ModelName
+
+# Create a new Filament page
+php artisan make:filament-page PageName
+
+# Create a new Filament widget
+php artisan make:filament-widget WidgetName
+
+# Create a new Filament relation manager
+php artisan make:filament-relation-manager ResourceName RelationName
+```
+
+### Livewire Commands
+
+```bash
+# Install Livewire (if not already installed)
+composer require livewire/livewire
+
+# Create a new Livewire component
+php artisan make:livewire ComponentName
+
+# Create a new Livewire component with view
+php artisan make:livewire ComponentName --view
+
+# Create a new Livewire component (inline)
+php artisan make:livewire ComponentName --inline
+
+# Publish Livewire configuration
+php artisan livewire:publish --config
+
+# Publish Livewire assets
+php artisan livewire:publish --assets
+
+# Discover Livewire components
+php artisan livewire:discover
+
+# Clear Livewire cache
+php artisan livewire:clear-cache
 ```
 
 ### API Documentation
@@ -267,6 +329,38 @@ chown -R www-data:www-data storage bootstrap/cache
 php artisan migrate:fresh --seed
 ```
 
+### Filament Issues
+
+```bash
+# Clear Filament cache
+php artisan filament:clear-cached-components
+
+# Clear all caches
+php artisan optimize:clear
+
+# Rebuild Filament assets
+php artisan filament:install --panels
+
+# Check Filament version
+composer show filament/filament
+```
+
+### Livewire Issues
+
+```bash
+# Clear Livewire cache
+php artisan livewire:clear-cache
+
+# Re-discover Livewire components
+php artisan livewire:discover
+
+# Clear view cache
+php artisan view:clear
+
+# Rebuild assets
+npm run build
+```
+
 ## Quick Start Script
 
 For a quick setup, you can run these commands in sequence:
@@ -280,6 +374,8 @@ php artisan migrate
 php artisan db:seed --class=StoreSeeder
 php artisan db:seed --class=CustomerSeeder
 php artisan db:seed --class=SupportTicketSeeder
+php artisan filament:clear-cached-components
+php artisan livewire:discover
 php artisan storage:link
 php artisan optimize
 npm run build

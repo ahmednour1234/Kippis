@@ -11,6 +11,7 @@ use App\Http\Requests\Api\V1\ForgotPasswordRequest;
 use App\Http\Requests\Api\V1\LoginCustomerRequest;
 use App\Http\Requests\Api\V1\RegisterCustomerRequest;
 use App\Http\Requests\Api\V1\ResetPasswordRequest;
+use App\Http\Requests\Api\V1\ResendOtpRequest;
 use App\Http\Resources\Api\V1\CustomerResource;
 use App\Http\Requests\Api\V1\VerifyCustomerRequest;
 use Illuminate\Http\JsonResponse;
@@ -19,7 +20,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * @group Customer Authentication
- * 
+ *
  * APIs for customer registration, verification, login, and password management.
  */
 class CustomerAuthController extends Controller
@@ -31,7 +32,7 @@ class CustomerAuthController extends Controller
 
     /**
      * Register a new customer.
-     * 
+     *
      * Register a new customer account. An OTP will be sent to the provided email for verification.
      *
      * @bodyParam name string required The customer's full name. Example: John Doe
@@ -42,7 +43,7 @@ class CustomerAuthController extends Controller
      * @bodyParam password string required The password (minimum 8 characters). Example: password123
      * @bodyParam password_confirmation string required Password confirmation. Example: password123
      * @bodyParam avatar file optional Customer avatar image (max 2MB).
-     * 
+     *
      * @response 201 {
      *   "success": true,
      *   "data": {
@@ -58,7 +59,7 @@ class CustomerAuthController extends Controller
      *   },
      *   "message": "Registration successful. Please check your email for OTP verification."
      * }
-     * 
+     *
      * @param RegisterCustomerRequest $request
      * @return JsonResponse
      */
@@ -84,12 +85,12 @@ class CustomerAuthController extends Controller
 
     /**
      * Verify customer account with OTP.
-     * 
+     *
      * Verify the customer's email address using the OTP sent during registration.
      *
      * @bodyParam email string required The customer's email address. Example: john@example.com
      * @bodyParam otp string required The 6-digit OTP code. Example: 123456
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "data": {
@@ -100,7 +101,7 @@ class CustomerAuthController extends Controller
      *   },
      *   "message": "Account verified successfully."
      * }
-     * 
+     *
      * @param VerifyCustomerRequest $request
      * @return JsonResponse
      */
@@ -130,15 +131,15 @@ class CustomerAuthController extends Controller
 
     /**
      * Login customer.
-     * 
+     *
      * Authenticate a customer and return a JWT token. The account must be verified.
-     * 
+     *
      * The JWT token should be included in subsequent requests in the Authorization header:
      * `Authorization: Bearer {token}`
      *
      * @bodyParam email string required The customer's email address. Example: john@example.com
      * @bodyParam password string required The customer's password. Example: password123
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "data": {
@@ -151,7 +152,7 @@ class CustomerAuthController extends Controller
      *   },
      *   "message": "Login successful."
      * }
-     * 
+     *
      * @param LoginCustomerRequest $request
      * @return JsonResponse
      */
@@ -181,16 +182,16 @@ class CustomerAuthController extends Controller
 
     /**
      * Send forgot password OTP.
-     * 
+     *
      * Request a password reset OTP to be sent to the customer's email.
      *
      * @bodyParam email string required The customer's email address. Example: john@example.com
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "If the email exists, an OTP has been sent to your email address."
      * }
-     * 
+     *
      * @param ForgotPasswordRequest $request
      * @return JsonResponse
      */
@@ -216,19 +217,19 @@ class CustomerAuthController extends Controller
 
     /**
      * Reset password with OTP.
-     * 
+     *
      * Reset the customer's password using the OTP sent via forgot password.
      *
      * @bodyParam email string required The customer's email address. Example: john@example.com
      * @bodyParam otp string required The 6-digit OTP code. Example: 123456
      * @bodyParam password string required The new password (minimum 8 characters). Example: newpassword123
      * @bodyParam password_confirmation string required Password confirmation. Example: newpassword123
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "Password reset successfully. You can now login with your new password."
      * }
-     * 
+     *
      * @param ResetPasswordRequest $request
      * @return JsonResponse
      */
@@ -261,19 +262,59 @@ class CustomerAuthController extends Controller
     }
 
     /**
+     * Resend OTP to customer.
+     *
+     * Resend an OTP code to the customer's email address. Can be used for verification or password reset.
+     *
+     * @bodyParam email string required The customer's email address. Example: john@example.com
+     * @bodyParam type string optional The OTP type: 'verification' or 'password_reset'. Default: 'verification'. Example: verification
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "message": "If the email exists, an OTP has been sent to your email address."
+     * }
+     *
+     * @param ResendOtpRequest $request
+     * @return JsonResponse
+     */
+    public function resendOtp(ResendOtpRequest $request): JsonResponse
+    {
+        try {
+            $validated = $request->validated();
+            $this->authService->resendOtp(
+                $validated['email'],
+                $validated['type'] ?? 'verification'
+            );
+
+            // Always return success for security (don't reveal if email exists)
+            return apiSuccess(
+                null,
+                'otp_sent'
+            );
+        } catch (\Exception $e) {
+            Log::error('Resend OTP failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return apiError('SERVER_ERROR', 'server_error', 500);
+        }
+    }
+
+    /**
      * Delete customer account.
-     * 
+     *
      * Permanently delete the authenticated customer's account. This will invalidate the JWT token and soft delete the account.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @header Authorization Bearer {token} JWT token obtained from login
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "Account deleted successfully."
      * }
-     * 
+     *
      * @response 401 {
      *   "success": false,
      *   "error": {
@@ -281,14 +322,14 @@ class CustomerAuthController extends Controller
      *     "message": "Unauthorized. Please login first."
      *   }
      * }
-     * 
+     *
      * @return JsonResponse
      */
     public function deleteAccount(): JsonResponse
     {
         try {
             $customer = auth('api')->user();
-            
+
             if (!$customer) {
                 return apiError('UNAUTHORIZED', 'unauthorized', 401);
             }
@@ -313,13 +354,13 @@ class CustomerAuthController extends Controller
 
     /**
      * Get authenticated customer data.
-     * 
+     *
      * Returns the authenticated customer's profile information.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @header Authorization Bearer {token} JWT token obtained from login
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "data": {
@@ -336,7 +377,7 @@ class CustomerAuthController extends Controller
      *     "updated_at": "2023-01-01 12:00:00"
      *   }
      * }
-     * 
+     *
      * @response 401 {
      *   "success": false,
      *   "error": {
@@ -344,7 +385,7 @@ class CustomerAuthController extends Controller
      *     "message": "Unauthorized. Please login first."
      *   }
      * }
-     * 
+     *
      * @response 404 {
      *   "success": false,
      *   "error": {
@@ -352,14 +393,14 @@ class CustomerAuthController extends Controller
      *     "message": "Customer not found."
      *   }
      * }
-     * 
+     *
      * @return JsonResponse
      */
     public function me(): JsonResponse
     {
         try {
             $customer = auth('api')->user();
-            
+
             if (!$customer) {
                 return apiError('UNAUTHORIZED', 'unauthorized', 401);
             }
@@ -383,18 +424,18 @@ class CustomerAuthController extends Controller
 
     /**
      * Logout customer.
-     * 
+     *
      * Invalidates the current JWT token, effectively logging out the customer.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @header Authorization Bearer {token} JWT token obtained from login
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "Logged out successfully."
      * }
-     * 
+     *
      * @response 401 {
      *   "success": false,
      *   "error": {
@@ -402,14 +443,14 @@ class CustomerAuthController extends Controller
      *     "message": "Unauthorized. Please login first."
      *   }
      * }
-     * 
+     *
      * @return JsonResponse
      */
     public function logout(): JsonResponse
     {
         try {
             $customer = auth('api')->user();
-            
+
             if (!$customer) {
                 return apiError('UNAUTHORIZED', 'unauthorized', 401);
             }
@@ -432,14 +473,14 @@ class CustomerAuthController extends Controller
 
     /**
      * Refresh JWT token.
-     * 
+     *
      * Generates a new JWT token for the authenticated customer, invalidating the old one.
      * This is useful for extending the session without requiring the customer to login again.
-     * 
+     *
      * @authenticated
-     * 
+     *
      * @header Authorization Bearer {token} JWT token obtained from login
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "data": {
@@ -447,7 +488,7 @@ class CustomerAuthController extends Controller
      *   },
      *   "message": "Token refreshed successfully."
      * }
-     * 
+     *
      * @response 401 {
      *   "success": false,
      *   "error": {
@@ -455,14 +496,14 @@ class CustomerAuthController extends Controller
      *     "message": "Unauthorized. Please login first."
      *   }
      * }
-     * 
+     *
      * @return JsonResponse
      */
     public function refreshToken(): JsonResponse
     {
         try {
             $customer = auth('api')->user();
-            
+
             if (!$customer) {
                 return apiError('UNAUTHORIZED', 'unauthorized', 401);
             }
