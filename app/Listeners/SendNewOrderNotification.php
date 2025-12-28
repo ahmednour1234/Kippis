@@ -35,16 +35,20 @@ class SendNewOrderNotification implements ShouldQueue
         })->get();
 
         foreach ($admins as $admin) {
-            // Send database notification
+            $customer = $order->customer;
+            $customerName = $customer->name ?? 'Guest';
+            
+            // Send database notification with user info and thumbnail
             $this->databaseNotificationService->info(
-                __('system.new_order_received'),
-                __('system.order_from_customer', [
-                    'order_id' => $order->id,
-                    'customer' => $order->customer->name ?? 'Guest',
-                    'total' => number_format($order->total, 2) . ' SAR',
-                ]),
+                $customerName,
+                __('system.reacted_to_your_post', ['action' => __('system.placed_new_order')]),
                 $admin,
-                route('filament.admin.resources.orders.view', $order->id)
+                route('filament.admin.resources.orders.view', $order->id),
+                [
+                    'user_name' => $customerName,
+                    'user_avatar' => $customer->avatar ?? null,
+                    'thumbnail' => $order->store->image ?? null,
+                ]
             );
 
             // Send real-time Filament notification

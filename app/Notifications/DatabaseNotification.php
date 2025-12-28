@@ -66,10 +66,14 @@ abstract class DatabaseNotification extends Notification
         return [
             'type' => $this->type,
             'title' => $this->title,
-            'message' => $this->message,
+            'body' => $this->message,
             'icon' => $this->icon,
-            'url' => $this->url,
-            'data' => $this->data,
+            'iconColor' => $this->type,
+            'action_url' => $this->url,
+            'action_text' => $this->data['action_text'] ?? null,
+            'user_name' => $this->data['user_name'] ?? $this->data['userName'] ?? null,
+            'user_avatar' => $this->data['user_avatar'] ?? $this->data['userAvatar'] ?? null,
+            'thumbnail' => $this->data['thumbnail'] ?? $this->data['image'] ?? null,
             'created_at' => now()->toIso8601String(),
         ];
     }

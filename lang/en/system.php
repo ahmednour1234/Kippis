@@ -335,5 +335,8 @@ return [
     'new_order_received' => 'New Order Received',
     'order_from_customer' => 'Order #:order_id from :customer - Total: :total',
     'order_from_customer_short' => 'Order #:order_id from :customer',
+    'placed_new_order' => 'placed a new order',
+    'reacted_to_your_post' => ':action',
+    'order_total' => 'Total: :total',
     'no_data' => 'No Data Available',
 ];

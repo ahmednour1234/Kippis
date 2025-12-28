@@ -319,5 +319,8 @@ return [
     'new_order_received' => 'طلب جديد تم استلامه',
     'order_from_customer' => 'طلب رقم :order_id من :customer - الإجمالي: :total',
     'order_from_customer_short' => 'طلب رقم :order_id من :customer',
+    'placed_new_order' => 'قام بوضع طلب جديد',
+    'reacted_to_your_post' => ':action',
+    'order_total' => 'الإجمالي: :total',
     'no_data' => 'لا توجد بيانات متاحة',
 ];
