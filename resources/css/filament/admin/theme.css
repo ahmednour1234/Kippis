@@ -49,3 +49,29 @@
 [dir="rtl"] .fi-sidebar-nav {
     direction: rtl;
 }
+
+/* Hide Filament native notification bell */
+.fi-topbar-item button[aria-label*="notification" i],
+.fi-topbar-item button[title*="notification" i],
+.fi-topbar-item [data-notification-bell],
+.fi-topbar-item:has(button[aria-label*="notification" i]) {
+    display: none !important;
+}
+
+/* More specific selector for Filament's native notification bell */
+.fi-topbar-item:has([data-notification-bell]),
+button[data-notification-bell] {
+    display: none !important;
+}
+
+/* Hide Filament's database notification bell (if enabled) */
+.fi-topbar-item[data-notification-bell],
+.fi-topbar-item button[aria-label*="Notifications"],
+.fi-topbar-item button[title*="Notifications"] {
+    display: none !important;
+}
+
+/* Alternative: Hide any topbar item that contains notification-related content */
+.fi-topbar-item:has(svg[class*="bell"]):not(:has([wire\\:id*="notifications-dropdown"])) {
+    display: none !important;
+}
