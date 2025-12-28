@@ -5,10 +5,19 @@ namespace App\Core\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Database\Factories\LoyaltyTransactionFactory;
 
 class LoyaltyTransaction extends Model
 {
     use HasFactory;
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return LoyaltyTransactionFactory::new();
+    }
 
     protected $fillable = [
         'wallet_id',
@@ -32,7 +41,7 @@ class LoyaltyTransaction extends Model
      */
     public function wallet(): BelongsTo
     {
-        return $this->belongsTo(LoyaltyWallet::class);
+        return $this->belongsTo(LoyaltyWallet::class, 'wallet_id');
     }
 
     /**

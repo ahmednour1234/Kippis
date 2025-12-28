@@ -6,10 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Database\Factories\LoyaltyWalletFactory;
 
 class LoyaltyWallet extends Model
 {
     use HasFactory;
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory()
+    {
+        return LoyaltyWalletFactory::new();
+    }
 
     protected $fillable = [
         'customer_id',
@@ -36,7 +45,7 @@ class LoyaltyWallet extends Model
      */
     public function transactions(): HasMany
     {
-        return $this->hasMany(LoyaltyTransaction::class);
+        return $this->hasMany(LoyaltyTransaction::class, 'wallet_id');
     }
 
     /**

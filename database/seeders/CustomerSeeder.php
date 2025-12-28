@@ -71,7 +71,10 @@ class CustomerSeeder extends Seeder
         ];
 
         foreach ($verifiedCustomers as $customerData) {
-            Customer::create($customerData);
+            Customer::firstOrCreate(
+                ['email' => $customerData['email']],
+                $customerData
+            );
         }
 
         // Create unverified customers
@@ -109,7 +112,10 @@ class CustomerSeeder extends Seeder
         ];
 
         foreach ($unverifiedCustomers as $customerData) {
-            Customer::create($customerData);
+            Customer::firstOrCreate(
+                ['email' => $customerData['email']],
+                $customerData
+            );
         }
 
         // Create additional random customers using factory

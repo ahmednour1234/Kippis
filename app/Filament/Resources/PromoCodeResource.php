@@ -76,7 +76,8 @@ class PromoCodeResource extends Resource
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255)
-                            ->uppercase(),
+                            ->transform(fn ($value) => strtoupper($value))
+                            ->afterStateUpdated(fn (Forms\Set $set, $state) => $set('code', strtoupper($state))),
                         Forms\Components\Select::make('discount_type')
                             ->label(__('system.discount_type'))
                             ->options([
