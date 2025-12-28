@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware('api.locale')->group(function () {
-    Route::prefix('v1/customers')->group(function () {
+    
+    // ==================== AUTHENTICATION APIs ====================
+    Route::prefix('v1/auth')->group(function () {
         // Public routes
         Route::post('/register', [CustomerAuthController::class, 'register']);
         Route::post('/verify', [CustomerAuthController::class, 'verify']);
@@ -33,39 +35,32 @@ Route::middleware('api.locale')->group(function () {
         });
     });
 
-    // Stores routes (public)
+    // ==================== STORES APIs ====================
     Route::prefix('v1/stores')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\StoreController::class, 'index']);
         Route::get('/{id}', [\App\Http\Controllers\Api\V1\StoreController::class, 'show']);
     });
 
-    // Support Tickets routes
-    Route::prefix('v1/support-tickets')->group(function () {
-        Route::post('/', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'store']);
-        Route::get('/', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'index']);
-        Route::get('/{id}', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'show']);
+    // ==================== HOME & CATALOG APIs ====================
+    Route::prefix('v1/catalog')->group(function () {
+        // Home API
+        Route::get('/home', [\App\Http\Controllers\Api\V1\HomeController::class, 'index']);
+        
+        // Categories
+        Route::get('/categories', [\App\Http\Controllers\Api\V1\CategoryController::class, 'index']);
+        
+        // Products
+        Route::get('/products', [\App\Http\Controllers\Api\V1\ProductController::class, 'index']);
+        Route::get('/products/{id}', [\App\Http\Controllers\Api\V1\ProductController::class, 'show']);
     });
 
-    // Home API (public)
-    Route::get('/v1/home', [\App\Http\Controllers\Api\V1\HomeController::class, 'index']);
-
-    // Categories & Products (public)
-    Route::prefix('v1/categories')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\V1\CategoryController::class, 'index']);
-    });
-
-    Route::prefix('v1/products')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Api\V1\ProductController::class, 'index']);
-        Route::get('/{id}', [\App\Http\Controllers\Api\V1\ProductController::class, 'show']);
-    });
-
-    // Mix Builder (public)
+    // ==================== MIX BUILDER APIs ====================
     Route::prefix('v1/mix')->group(function () {
         Route::get('/options', [\App\Http\Controllers\Api\V1\MixController::class, 'options']);
         Route::post('/preview', [\App\Http\Controllers\Api\V1\MixController::class, 'preview']);
     });
 
-    // Cart APIs (authenticated or guest)
+    // ==================== CART APIs ====================
     Route::prefix('v1/cart')->group(function () {
         Route::post('/init', [\App\Http\Controllers\Api\V1\CartController::class, 'init']);
         Route::get('/', [\App\Http\Controllers\Api\V1\CartController::class, 'index']);
@@ -77,27 +72,53 @@ Route::middleware('api.locale')->group(function () {
         Route::post('/abandon', [\App\Http\Controllers\Api\V1\CartController::class, 'abandon']);
     });
 
-    // Checkout (requires authentication)
-    Route::middleware('auth:api')->post('/v1/checkout', [\App\Http\Controllers\Api\V1\OrderController::class, 'checkout']);
-
-    // Orders (authenticated)
+    // ==================== ORDERS APIs ====================
     Route::middleware('auth:api')->prefix('v1/orders')->group(function () {
+        Route::post('/checkout', [\App\Http\Controllers\Api\V1\OrderController::class, 'checkout']);
         Route::get('/', [\App\Http\Controllers\Api\V1\OrderController::class, 'index']);
         Route::get('/{id}', [\App\Http\Controllers\Api\V1\OrderController::class, 'show']);
         Route::get('/{id}/tracking', [\App\Http\Controllers\Api\V1\OrderController::class, 'tracking']);
         Route::post('/{id}/reorder', [\App\Http\Controllers\Api\V1\OrderController::class, 'reorder']);
     });
 
-    // Loyalty (authenticated)
+    // ==================== LOYALTY APIs ====================
     Route::middleware('auth:api')->prefix('v1/loyalty')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\LoyaltyController::class, 'index']);
+        Route::post('/redeem', [\App\Http\Controllers\Api\V1\LoyaltyController::class, 'redeem']);
     });
 
-    // QR Receipts (authenticated)
-    Route::middleware('auth:api')->prefix('v1/qr')->group(function () {
+    // ==================== QR RECEIPTS APIs ====================
+    Route::middleware('auth:api')->prefix('v1/qr-receipts')->group(function () {
         Route::post('/scan', [\App\Http\Controllers\Api\V1\QrReceiptController::class, 'scan']);
         Route::post('/manual', [\App\Http\Controllers\Api\V1\QrReceiptController::class, 'manual']);
         Route::get('/history', [\App\Http\Controllers\Api\V1\QrReceiptController::class, 'history']);
     });
-});
 
+    // ==================== SUPPORT TICKETS APIs ====================
+    Route::prefix('v1/support')->group(function () {
+        Route::post('/tickets', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'store']);
+        Route::get('/tickets', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'index']);
+        Route::get('/tickets/{id}', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'show']);
+    });
+
+    // ==================== LEGACY ROUTES (for backward compatibility) ====================
+    // Keep old routes working but redirect to new structure
+    Route::get('/v1/home', [\App\Http\Controllers\Api\V1\HomeController::class, 'index']);
+    Route::prefix('v1/categories')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\CategoryController::class, 'index']);
+    });
+    Route::prefix('v1/products')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\ProductController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\V1\ProductController::class, 'show']);
+    });
+    Route::prefix('v1/qr')->group(function () {
+        Route::post('/scan', [\App\Http\Controllers\Api\V1\QrReceiptController::class, 'scan']);
+        Route::post('/manual', [\App\Http\Controllers\Api\V1\QrReceiptController::class, 'manual']);
+        Route::get('/history', [\App\Http\Controllers\Api\V1\QrReceiptController::class, 'history']);
+    });
+    Route::prefix('v1/support-tickets')->group(function () {
+        Route::post('/', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'store']);
+        Route::get('/', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'index']);
+        Route::get('/{id}', [\App\Http\Controllers\Api\V1\SupportTicketController::class, 'show']);
+    });
+});

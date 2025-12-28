@@ -76,7 +76,7 @@ class PromoCodeResource extends Resource
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255)
-                            ->transform(fn ($value) => strtoupper($value))
+                            ->dehydrateStateUsing(fn ($state) => strtoupper($state))
                             ->afterStateUpdated(fn (Forms\Set $set, $state) => $set('code', strtoupper($state))),
                         Forms\Components\Select::make('discount_type')
                             ->label(__('system.discount_type'))
