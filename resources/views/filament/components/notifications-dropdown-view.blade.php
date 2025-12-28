@@ -112,7 +112,7 @@
             @if($notifications->count() > 0)
                 <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-3 text-center">
                     <a
-                        href="{{ \Filament\Facades\Filament::getUrl(\App\Filament\Pages\AllNotifications::class) }}"
+                        href="{{ \App\Filament\Pages\AllNotifications::getUrl() }}"
                         class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
                     >
                         {{ __('system.view_all_notifications') }}
