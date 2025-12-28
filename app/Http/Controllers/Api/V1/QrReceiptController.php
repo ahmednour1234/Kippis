@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Core\Repositories\LoyaltyWalletRepository;
 use App\Core\Repositories\QrReceiptRepository;
+use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\QrReceiptResource;
 use Illuminate\Http\JsonResponse;
@@ -13,7 +14,8 @@ class QrReceiptController extends Controller
 {
     public function __construct(
         private QrReceiptRepository $qrReceiptRepository,
-        private LoyaltyWalletRepository $loyaltyWalletRepository
+        private LoyaltyWalletRepository $loyaltyWalletRepository,
+        private FileHelper $fileHelper
     ) {
     }
 
@@ -28,7 +30,7 @@ class QrReceiptController extends Controller
         ]);
 
         $customer = auth('api')->user();
-        $imagePath = $request->file('receipt_image')->store('qr_receipts', 'public');
+        $imagePath = $this->fileHelper->uploadImage($request->file('receipt_image'), 'qr_receipts', 'public', 5120);
 
         $receipt = $this->qrReceiptRepository->create([
             'customer_id' => $customer->id,

@@ -308,4 +308,24 @@ return [
     'receipt_rejected' => 'Receipt Rejected',
     'from' => 'From',
     'to' => 'To',
+
+    // Dashboard Statistics
+    'today_sales' => 'Today Sales',
+    'this_month_sales' => 'This Month Sales',
+    'total_orders' => 'Total Orders',
+    'orders_today' => 'orders today',
+    'orders_this_month' => 'orders this month',
+    'all_time_orders' => 'All time orders',
+    'top_stores' => 'Top Stores',
+    'top_products' => 'Top Products',
+    'recent_orders' => 'Recent Orders',
+    'total_revenue' => 'Total Revenue',
+    'total_sold' => 'Total Sold',
+    'order_id' => 'Order ID',
+
+    // Order Notifications
+    'new_order_received' => 'New Order Received',
+    'order_from_customer' => 'Order #:order_id from :customer - Total: :total',
+    'order_from_customer_short' => 'Order #:order_id from :customer',
+    'no_data' => 'No Data Available',
 ];

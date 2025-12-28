@@ -176,14 +176,15 @@ class ProductResource extends Resource
                 Tables\Columns\ImageColumn::make('image')
                     ->label(__('system.image'))
                     ->circular(),
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('name_json.en')
                     ->label(__('system.name'))
-                    ->formatStateUsing(fn ($record) => $record->getName(app()->getLocale()))
-                    ->searchable()
+                    ->getStateUsing(fn ($record) => $record->getName(app()->getLocale()))
+                    ->searchable(query: fn ($query, string $search) => $query->where('name_json->en', 'like', "%{$search}%")->orWhere('name_json->ar', 'like', "%{$search}%"))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('category.name')
+                Tables\Columns\TextColumn::make('category.name_json.en')
                     ->label(__('system.category'))
-                    ->formatStateUsing(fn ($record) => $record->category?->getName(app()->getLocale()))
+                    ->getStateUsing(fn ($record) => $record->category?->getName(app()->getLocale()))
+                    ->searchable(query: fn ($query, string $search) => $query->whereHas('category', fn ($q) => $q->where('name_json->en', 'like', "%{$search}%")->orWhere('name_json->ar', 'like', "%{$search}%")))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('base_price')
                     ->label(__('system.base_price'))

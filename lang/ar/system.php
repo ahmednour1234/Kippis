@@ -292,4 +292,24 @@ return [
     'receipt_rejected' => 'تم رفض الإيصال',
     'from' => 'من',
     'to' => 'إلى',
+
+    // Dashboard Statistics
+    'today_sales' => 'مبيعات اليوم',
+    'this_month_sales' => 'مبيعات هذا الشهر',
+    'total_orders' => 'إجمالي الطلبات',
+    'orders_today' => 'طلبات اليوم',
+    'orders_this_month' => 'طلبات هذا الشهر',
+    'all_time_orders' => 'جميع الطلبات',
+    'top_stores' => 'أفضل المتاجر',
+    'top_products' => 'أفضل المنتجات',
+    'recent_orders' => 'الطلبات الأخيرة',
+    'total_revenue' => 'إجمالي الإيرادات',
+    'total_sold' => 'إجمالي المبيعات',
+    'order_id' => 'رقم الطلب',
+
+    // Order Notifications
+    'new_order_received' => 'طلب جديد تم استلامه',
+    'order_from_customer' => 'طلب رقم :order_id من :customer - الإجمالي: :total',
+    'order_from_customer_short' => 'طلب رقم :order_id من :customer',
+    'no_data' => 'لا توجد بيانات متاحة',
 ];

@@ -4,6 +4,7 @@ namespace App\Core\Repositories;
 
 use App\Core\Models\Order;
 use App\Core\Models\PromoCodeUsage;
+use App\Events\OrderCreated;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
 
@@ -51,6 +52,9 @@ class OrderRepository
 
             $cart->promoCode->increment('used_count');
         }
+
+        // Dispatch event for real-time notification
+        event(new OrderCreated($order));
 
         return $order;
     }
