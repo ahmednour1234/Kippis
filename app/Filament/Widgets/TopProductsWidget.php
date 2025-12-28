@@ -11,9 +11,12 @@ use Illuminate\Support\Collection;
 
 class TopProductsWidget extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = [
+        'md' => 1,
+        'xl' => 1,
+    ];
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 8;
 
     protected static ?string $heading = null;
 

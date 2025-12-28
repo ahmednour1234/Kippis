@@ -11,9 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 class TopStoresWidget extends BaseWidget
 {
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = [
+        'md' => 1,
+        'xl' => 1,
+    ];
 
-    protected static ?int $sort = 2;
+    protected static ?int $sort = 7;
 
     public function table(Table $table): Table
     {

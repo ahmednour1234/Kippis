@@ -9,7 +9,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RecentTicketRepliesWidget extends BaseWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 9;
 
     protected int | string | array $columnSpan = 'full';
 
