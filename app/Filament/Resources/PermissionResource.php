@@ -22,7 +22,7 @@ class PermissionResource extends Resource
     {
         return __('navigation.groups.system_management');
     }
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
     
     public static function getNavigationLabel(): string
     {

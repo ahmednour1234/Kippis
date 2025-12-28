@@ -22,7 +22,7 @@ class RoleResource extends Resource
     {
         return __('navigation.groups.system_management');
     }
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
     
     public static function getNavigationLabel(): string
     {

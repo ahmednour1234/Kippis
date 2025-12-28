@@ -27,7 +27,7 @@ class ModifierResource extends Resource
         return __('navigation.groups.content_management');
     }
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
 
     public static function getNavigationLabel(): string
     {

@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             ModifierSeeder::class,
             PromoCodeSeeder::class,
             LoyaltyWalletSeeder::class,
+            CartSeeder::class,
+            OrderSeeder::class,
         ]);
     }
 }

@@ -27,7 +27,7 @@ class CategoryResource extends Resource
         return __('navigation.groups.content_management');
     }
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 3;
 
     public static function getNavigationLabel(): string
     {

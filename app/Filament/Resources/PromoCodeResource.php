@@ -28,7 +28,7 @@ class PromoCodeResource extends Resource
         return __('navigation.groups.content_management');
     }
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 5;
 
     public static function getNavigationLabel(): string
     {

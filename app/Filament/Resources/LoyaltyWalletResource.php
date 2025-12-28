@@ -28,7 +28,7 @@ class LoyaltyWalletResource extends Resource
         return __('navigation.groups.customer_management');
     }
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 8;
 
     public static function getNavigationLabel(): string
     {

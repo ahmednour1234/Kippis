@@ -2,7 +2,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\AdminStatsWidget;
 use App\Filament\Widgets\CustomerStatsWidget;
 use App\Filament\Widgets\RecentOrdersWidget;
 use App\Filament\Widgets\RecentTicketRepliesWidget;
@@ -26,7 +25,6 @@ class Dashboard extends BaseDashboard
             SalesStatsWidget::class,
             StoreStatsWidget::class,
             CustomerStatsWidget::class,
-            AdminStatsWidget::class,
             TicketStatsWidget::class,
         ];
     }

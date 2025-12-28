@@ -27,7 +27,7 @@ class QrReceiptResource extends Resource
         return __('navigation.groups.customer_management');
     }
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 7;
 
     public static function getNavigationLabel(): string
     {
