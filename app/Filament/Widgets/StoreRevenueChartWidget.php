@@ -8,7 +8,10 @@ use Filament\Widgets\ChartWidget;
 
 class StoreRevenueChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Revenue by Store (Last 30 Days)';
+    public function getHeading(): ?string
+    {
+        return 'Revenue by Store (Last 30 Days)';
+    }
     
     protected static ?int $sort = 4;
     

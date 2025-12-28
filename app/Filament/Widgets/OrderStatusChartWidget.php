@@ -7,7 +7,10 @@ use Filament\Widgets\ChartWidget;
 
 class OrderStatusChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Orders by Status';
+    public function getHeading(): ?string
+    {
+        return 'Orders by Status';
+    }
     
     protected static ?int $sort = 3;
     

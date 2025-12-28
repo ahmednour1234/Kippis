@@ -7,7 +7,10 @@ use Filament\Widgets\ChartWidget;
 
 class OrdersByDayChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Orders by Day of Week (Last 4 Weeks)';
+    public function getHeading(): ?string
+    {
+        return 'Orders by Day of Week (Last 4 Weeks)';
+    }
     
     protected static ?int $sort = 5;
     

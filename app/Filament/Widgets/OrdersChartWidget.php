@@ -7,7 +7,10 @@ use Filament\Widgets\ChartWidget;
 
 class OrdersChartWidget extends ChartWidget
 {
-    protected static ?string $heading = 'Orders Trend (Last 30 Days)';
+    public function getHeading(): ?string
+    {
+        return 'Orders Trend (Last 30 Days)';
+    }
     
     protected static ?int $sort = 2;
     
