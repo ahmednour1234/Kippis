@@ -19,7 +19,7 @@ class OrderStatusChartWidget extends ChartWidget
         'xl' => 1,
     ];
     
-    protected static ?string $maxHeight = '300px';
+    protected ?string $maxHeight = '300px';
 
     protected function getData(): array
     {
