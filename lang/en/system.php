@@ -43,6 +43,8 @@ return [
     'notification_marked_as_read' => 'Notification marked as read',
     'notifications_marked_as_read' => 'Notifications marked as read',
     'all_notifications_marked_as_read' => 'All notifications marked as read',
+    'mark_all_as_read' => 'Mark all as read',
+    'language' => 'Language',
     'ticket_assigned' => 'Ticket Assigned',
     'ticket_assigned_message' => 'You have been assigned ticket #:id - :title',
     'view_ticket' => 'View Ticket',

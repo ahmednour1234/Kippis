@@ -20,14 +20,33 @@ class CustomTheme implements \Filament\Contracts\Plugin
     {
         FilamentAsset::register([
             $this->getThemeAsset(),
+            $this->getRtlAsset(),
         ], 'custom-theme');
+    }
+    
+    protected function getRtlAsset(): Asset
+    {
+        return Css::make('rtl-support', __DIR__ . '/../../resources/css/filament/admin/rtl.css');
     }
 
     public function boot(\Filament\Panel $panel): void
     {
+        // Set HTML direction for RTL support
         FilamentView::registerRenderHook(
-            PanelsRenderHook::SIDEBAR_NAV_END,
-            fn (): View => view('filament.components.language-switcher-sidebar'),
+            PanelsRenderHook::HEAD_START,
+            fn (): View => view('filament.components.html-direction'),
+        );
+        
+        // Register topbar notifications dropdown (before user menu)
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::USER_MENU_BEFORE,
+            fn (): View => view('filament.components.notifications-dropdown'),
+        );
+        
+        // Register topbar language switcher (before user menu)
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::USER_MENU_BEFORE,
+            fn (): View => view('filament.components.language-switcher-topbar'),
         );
     }
 

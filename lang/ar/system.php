@@ -43,6 +43,8 @@ return [
     'notification_marked_as_read' => 'تم تحديد الإشعار كمقروء',
     'notifications_marked_as_read' => 'تم تحديد الإشعارات كمقروءة',
     'all_notifications_marked_as_read' => 'تم تحديد جميع الإشعارات كمقروءة',
+    'mark_all_as_read' => 'تحديد الكل كمقروء',
+    'language' => 'اللغة',
     'ticket_assigned' => 'تم تعيين تذكرة',
     'ticket_assigned_message' => 'تم تعيين التذكرة رقم :id لك - :title',
     'view_ticket' => 'عرض التذكرة',

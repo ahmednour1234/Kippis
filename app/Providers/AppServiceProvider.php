@@ -27,5 +27,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Register observers
         \App\Core\Models\SupportTicket::observe(\App\Observers\SupportTicketObserver::class);
+        
+        // Share HTML direction for RTL support
+        view()->composer('*', function ($view) {
+            $locale = app()->getLocale();
+            $direction = $locale === 'ar' ? 'rtl' : 'ltr';
+            $view->with('htmlDir', $direction);
+        });
     }
 }

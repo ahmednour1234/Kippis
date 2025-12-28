@@ -2,13 +2,13 @@
 
 namespace App\Filament\Pages;
 
-use App\Core\Models\AdminNotification;
-use App\Core\Services\NotificationService;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Tables;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Support\Facades\Auth;
 
 class AllNotifications extends Page implements HasTable
@@ -44,7 +44,7 @@ class AllNotifications extends Page implements HasTable
         $admin = Auth::guard('admin')->user();
         
         return $table
-            ->query(AdminNotification::query()->where('admin_id', $admin->id))
+            ->query($admin->notifications()->getQuery())
             ->columns([
                 Tables\Columns\IconColumn::make('read_at')
                     ->label(__('system.read'))
@@ -55,19 +55,17 @@ class AllNotifications extends Page implements HasTable
                     ->falseColor('danger'),
                 Tables\Columns\TextColumn::make('type')
                     ->label(__('system.type'))
+                    ->formatStateUsing(fn (DatabaseNotification $record) => $record->type)
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'ticket' => 'warning',
-                        'security' => 'danger',
-                        'admin' => 'info',
-                        default => 'gray',
-                    }),
+                    ->color('info'),
                 Tables\Columns\TextColumn::make('title')
                     ->label(__('system.title'))
+                    ->formatStateUsing(fn (DatabaseNotification $record) => $record->data['title'] ?? 'Notification')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('message')
+                Tables\Columns\TextColumn::make('body')
                     ->label(__('system.message'))
+                    ->formatStateUsing(fn (DatabaseNotification $record) => $record->data['body'] ?? '')
                     ->limit(50)
                     ->wrap(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -81,30 +79,27 @@ class AllNotifications extends Page implements HasTable
                     ->placeholder(__('system.all'))
                     ->trueLabel(__('system.read'))
                     ->falseLabel(__('system.unread')),
-                Tables\Filters\SelectFilter::make('type')
-                    ->label(__('system.type'))
-                    ->options([
-                        'system' => __('system.system'),
-                        'admin' => __('system.admin'),
-                        'ticket' => __('system.ticket'),
-                        'security' => __('system.security'),
-                    ]),
             ])
             ->actions([
                 Tables\Actions\Action::make('mark_read')
                     ->label(__('system.mark_as_read'))
                     ->icon('heroicon-o-check')
                     ->color('success')
-                    ->action(function (AdminNotification $record) {
-                        app(NotificationService::class)->markAsRead($record);
-                        notify()->success(__('system.notification_marked_as_read'));
+                    ->action(function (DatabaseNotification $record) {
+                        if (!$record->read_at) {
+                            $record->markAsRead();
+                            Notification::make()
+                                ->title(__('system.notification_marked_as_read'))
+                                ->success()
+                                ->send();
+                        }
                     })
-                    ->visible(fn (AdminNotification $record) => !$record->isRead()),
+                    ->visible(fn (DatabaseNotification $record) => !$record->read_at),
                 Tables\Actions\Action::make('view')
                     ->label(__('system.view'))
                     ->icon('heroicon-o-eye')
-                    ->url(fn (AdminNotification $record) => $record->action_url)
-                    ->visible(fn (AdminNotification $record) => $record->action_url !== null),
+                    ->url(fn (DatabaseNotification $record) => $record->data['action_url'] ?? null)
+                    ->visible(fn (DatabaseNotification $record) => !empty($record->data['action_url'] ?? null)),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -113,9 +108,14 @@ class AllNotifications extends Page implements HasTable
                         ->icon('heroicon-o-check')
                         ->action(function ($records) {
                             foreach ($records as $record) {
-                                app(NotificationService::class)->markAsRead($record);
+                                if (!$record->read_at) {
+                                    $record->markAsRead();
+                                }
                             }
-                            notify()->success(__('system.notifications_marked_as_read'));
+                            Notification::make()
+                                ->title(__('system.notifications_marked_as_read'))
+                                ->success()
+                                ->send();
                         }),
                 ]),
             ])

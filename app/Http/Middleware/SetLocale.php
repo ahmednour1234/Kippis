@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Core\Services\LocalizationService;
+use App\Helpers\LocaleManager;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,30 +12,27 @@ class SetLocale
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $localizationService = app(LocalizationService::class);
-        
-        // Get authenticated admin
-        $admin = Auth::guard('admin')->user();
-        
-        // Priority: Query parameter > Session > Admin preference > Default
+        // Priority: Query parameter > User preference > Session > Cache > Default
         if ($request->has('locale')) {
             $locale = $request->get('locale');
             if (in_array($locale, ['en', 'ar'])) {
-                app()->setLocale($locale);
-                session(['locale' => $locale]);
-                
-                // Update admin's locale if authenticated
-                if ($admin) {
-                    $admin->update(['locale' => $locale]);
-                }
+                LocaleManager::setLocale($locale);
             }
-        } elseif (session()->has('locale')) {
-            app()->setLocale(session('locale'));
-        } elseif ($admin && $admin->locale) {
-            $localizationService->setLocale($admin);
+        } else {
+            $locale = LocaleManager::getCurrentLocale();
+            app()->setLocale($locale);
         }
         
-        return $next($request);
+        // Set HTML direction for RTL support
+        $direction = LocaleManager::getHtmlDirection();
+        view()->share(['htmlDirection' => $direction, 'htmlDir' => $direction]);
+        
+        $response = $next($request);
+        
+        // Add locale to response
+        $response->headers->set('Content-Language', $locale);
+        
+        return $response;
     }
 }
 

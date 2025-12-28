@@ -67,6 +67,13 @@ class AdminPanelProvider extends PanelProvider
             ->authPasswordBroker('admins')
             ->brandName('Kippis')
             ->favicon(asset('favicon.ico'))
+            ->userMenuItems([
+                \Filament\Navigation\MenuItem::make()
+                    ->label(__('system.all_notifications'))
+                    ->icon('heroicon-o-bell')
+                    ->url(fn () => \App\Filament\Pages\AllNotifications::getUrl())
+                    ->visible(fn () => true),
+            ])
             ->navigationGroups([
                 __('navigation.groups.system_management'),
                 __('navigation.groups.security'),
