@@ -35,16 +35,31 @@
         </x-slot>
 
         <div {{ $isRtl ? 'dir="rtl"' : '' }} class="w-[420px] max-h-[600px] flex flex-col">
-            <!-- Header -->
-            <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 flex items-center justify-between">
-                <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                    {{ __('system.notifications') }}
-                </h3>
+            <!-- Header - Enhanced Design -->
+            <div class="px-5 py-4 border-b border-gray-200/60 dark:border-gray-700/60 bg-gradient-to-r from-primary-50/50 via-white to-white dark:from-primary-900/10 dark:via-gray-900 dark:to-gray-900 flex items-center justify-between backdrop-blur-sm">
+                <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-lg shadow-primary-500/25">
+                        <x-filament::icon
+                            icon="heroicon-o-bell"
+                            class="h-5 w-5 text-white"
+                        />
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-gray-900 dark:text-white">
+                            {{ __('system.notifications') }}
+                        </h3>
+                        @if($unreadCount > 0)
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                {{ $unreadCount }} {{ $unreadCount === 1 ? __('system.unread_notification') : __('system.unread_notifications') }}
+                            </p>
+                        @endif
+                    </div>
+                </div>
                 @if($unreadCount > 0)
                     <button
                         wire:click="markAllAsRead"
                         type="button"
-                        class="text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200 hover:underline"
+                        class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-all duration-200 hover:bg-primary-50 dark:hover:bg-primary-900/20"
                     >
                         {{ __('system.mark_all_as_read') }}
                     </button>
@@ -86,7 +101,7 @@
                         @endphp
                         @php
                             $itemAttributes = new \Illuminate\View\ComponentAttributeBag([
-                                'class' => 'facebook-notification-item group relative px-4 py-3 cursor-pointer transition-all duration-150 ' . (!$isRead ? 'bg-[#E7F3FF] dark:bg-blue-900/20' : 'bg-white dark:bg-gray-900') . ' hover:bg-[#F2F2F2] dark:hover:bg-gray-800/50',
+                                'class' => 'facebook-notification-item group relative px-5 py-4 cursor-pointer transition-all duration-200 ' . (!$isRead ? 'bg-gradient-to-r from-blue-50/80 via-blue-50/60 to-transparent dark:from-blue-900/30 dark:via-blue-900/20 dark:to-transparent' : 'bg-white dark:bg-gray-900') . ' hover:shadow-sm',
                             ]);
                             if (!empty($notification['actionUrl'])) {
                                 $itemAttributes = $itemAttributes->merge(['href' => $notification['actionUrl']]);
@@ -96,19 +111,19 @@
                             wire:click="markAsRead('{{ $notification['id'] }}')"
                             :attributes="\Filament\Support\prepare_inherited_attributes($itemAttributes)"
                         >
-                            <div class="flex items-start gap-3">
+                            <div class="flex items-start gap-4">
                                 <!-- Unread dot indicator -->
                                 @if(!$isRead)
-                                    <div class="flex-shrink-0 mt-2">
-                                        <span class="h-2 w-2 rounded-full bg-primary-500 block"></span>
+                                    <div class="flex-shrink-0 mt-2.5">
+                                        <span class="h-2.5 w-2.5 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 block shadow-lg shadow-primary-500/50"></span>
                                     </div>
                                 @else
-                                    <div class="flex-shrink-0 w-2"></div>
+                                    <div class="flex-shrink-0 w-2.5"></div>
                                 @endif
 
-                                <!-- Icon circle (avatar) -->
+                                <!-- Icon circle (avatar) - Enhanced -->
                                 <div class="flex-shrink-0">
-                                    <div class="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden ring-1 ring-gray-200 dark:ring-gray-700">
+                                    <div class="h-12 w-12 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center overflow-hidden ring-2 ring-gray-200/50 dark:ring-gray-700/50 shadow-md transition-all duration-200 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 group-hover:scale-105">
                                         @if($userAvatar || $userName)
                                             <img 
                                                 src="{{ $avatarUrl }}" 
@@ -119,36 +134,43 @@
                                         @else
                                             <x-filament::icon
                                                 icon="{{ $notification['icon'] ?? 'heroicon-o-bell' }}"
-                                                class="h-5 w-5 text-gray-500 dark:text-gray-400"
+                                                class="h-6 w-6 text-gray-500 dark:text-gray-400"
                                             />
                                         @endif
                                     </div>
                                 </div>
                                 
-                                <!-- Notification Content -->
-                                <div class="flex-1 min-w-0">
+                                <!-- Notification Content - Better Arrangement -->
+                                <div class="flex-1 min-w-0 space-y-1">
                                     <p class="text-sm text-gray-900 dark:text-white leading-relaxed">
                                         @if($userName)
-                                            <span class="font-semibold">{{ $userName }}</span>
-                                            <span class="text-gray-700 dark:text-gray-300">{{ $actionText }}</span>
+                                            <span class="font-bold text-gray-900 dark:text-white">{{ $userName }}</span>
+                                            <span class="text-gray-600 dark:text-gray-300 ml-1">{{ $actionText }}</span>
                                         @else
-                                            <span class="text-gray-900 dark:text-white">{{ $actionText }}</span>
+                                            <span class="text-gray-900 dark:text-white font-medium">{{ $actionText }}</span>
                                         @endif
                                     </p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        {{ $notification['created_at']->diffForHumans() }}
-                                    </p>
+                                    <div class="flex items-center gap-2">
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                                            {{ $notification['created_at']->diffForHumans() }}
+                                        </p>
+                                        @if(!$isRead)
+                                            <span class="h-1.5 w-1.5 rounded-full bg-primary-500"></span>
+                                        @endif
+                                    </div>
                                 </div>
                                 
-                                <!-- Thumbnail (if available) -->
+                                <!-- Thumbnail (if available) - Enhanced -->
                                 @if($thumbnailUrl)
                                     <div class="flex-shrink-0">
-                                        <img 
-                                            src="{{ $thumbnailUrl }}" 
-                                            alt="Thumbnail"
-                                            class="h-10 w-10 rounded object-cover"
-                                            onerror="this.style.display='none'"
-                                        />
+                                        <div class="h-12 w-12 rounded-lg overflow-hidden ring-2 ring-gray-200/50 dark:ring-gray-700/50 shadow-md">
+                                            <img 
+                                                src="{{ $thumbnailUrl }}" 
+                                                alt="Thumbnail"
+                                                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-110"
+                                                onerror="this.style.display='none'"
+                                            />
+                                        </div>
                                     </div>
                                 @endif
                             </div>
@@ -172,22 +194,30 @@
                 </x-filament::dropdown.list>
             </div>
 
-            <!-- Footer -->
+            <!-- Footer - Enhanced Design -->
             @if($notifications->count() > 0)
-                <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between gap-2">
+                <div class="px-5 py-4 border-t border-gray-200/60 dark:border-gray-700/60 bg-gradient-to-r from-gray-50/80 via-gray-50/60 to-transparent dark:from-gray-800/50 dark:via-gray-800/30 dark:to-transparent backdrop-blur-sm flex items-center justify-between gap-3">
                     <a
                         href="{{ \App\Filament\Pages\AllNotifications::getUrl() }}"
-                        class="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200"
+                        class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-all duration-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 group"
                     >
-                        عرض جميع الإشعارات
+                        <span>عرض جميع الإشعارات</span>
+                        <x-filament::icon
+                            icon="heroicon-o-arrow-left"
+                            class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                        />
                     </a>
                     @if($unreadCount > 0)
                         <button
                             wire:click="markAllAsRead"
                             type="button"
-                            class="text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200"
+                            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-all duration-200 hover:bg-primary-50 dark:hover:bg-primary-900/20"
                         >
-                            وضع علامة على الكل كمقروء
+                            <x-filament::icon
+                                icon="heroicon-o-check-circle"
+                                class="h-4 w-4"
+                            />
+                            <span>وضع علامة على الكل كمقروء</span>
                         </button>
                     @endif
                 </div>
