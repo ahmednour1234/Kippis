@@ -27,7 +27,7 @@
                     class="h-5 w-5 transition-colors duration-75 group-hover:text-primary-600 dark:group-hover:text-primary-400"
                 />
                 @if($unreadCount > 0)
-                    <span class="absolute -top-0.5 -right-0.5 flex min-h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-danger-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-gray-900">
+                    <span class="absolute -top-0.5 -right-0.5 flex min-h-[1.25rem] min-w-[1.25rem] items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-red-600 px-1.5 text-[10px] font-bold leading-none text-white shadow-lg ring-2 ring-white dark:ring-gray-900 animate-pulse">
                         {{ $unreadCount > 99 ? '99+' : $unreadCount }}
                     </span>
                 @endif
