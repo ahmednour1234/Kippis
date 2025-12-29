@@ -20,6 +20,35 @@ class OrderController extends Controller
     ) {
     }
 
+    /**
+     * Checkout cart and create order
+     * 
+     * @authenticated
+     * 
+     * @bodyParam payment_method string required Payment method. Options: `cash`, `card`, `online`. Example: cash
+     * 
+     * @response 201 {
+     *   "success": true,
+     *   "message": "order_created",
+     *   "data": {
+     *     "order_id": 123,
+     *     "pickup_code": "ABC123",
+     *     "total": 75.50
+     *   }
+     * }
+     * 
+     * @response 400 {
+     *   "success": false,
+     *   "error": "CART_EMPTY",
+     *   "message": "cart_empty"
+     * }
+     * 
+     * @response 401 {
+     *   "success": false,
+     *   "error": "UNAUTHORIZED",
+     *   "message": "unauthorized"
+     * }
+     */
     public function checkout(Request $request): JsonResponse
     {
         $request->validate([
@@ -48,6 +77,40 @@ class OrderController extends Controller
         ], 'order_created', 201);
     }
 
+    /**
+     * Get list of customer orders
+     * 
+     * @authenticated
+     * 
+     * @queryParam status string optional Filter by status (active, completed, cancelled). Default: "active". Example: "completed"
+     * @queryParam payment_method string optional Filter by payment method. Example: "cash"
+     * @queryParam store_id integer optional Filter by store ID. Example: 1
+     * @queryParam date_from date optional Filter orders from date (Y-m-d). Example: "2025-01-01"
+     * @queryParam date_to date optional Filter orders to date (Y-m-d). Example: "2025-12-31"
+     * @queryParam total_min number optional Minimum order total. Example: 10.50
+     * @queryParam total_max number optional Maximum order total. Example: 100.00
+     * @queryParam sort_by string optional Sort field. Default: "created_at". Example: "total"
+     * @queryParam sort_order string optional Sort order (asc, desc). Default: "desc". Example: "asc"
+     * @queryParam per_page integer optional Items per page (max 100). Default: 15. Example: 20
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": [
+     *     {
+     *       "id": 123,
+     *       "pickup_code": "ABC123",
+     *       "status": "completed",
+     *       "total": 75.50
+     *     }
+     *   ],
+     *   "pagination": {
+     *     "current_page": 1,
+     *     "per_page": 15,
+     *     "total": 50,
+     *     "last_page": 4
+     *   }
+     * }
+     */
     public function index(Request $request): JsonResponse
     {
         $customer = auth('api')->user();
@@ -79,6 +142,30 @@ class OrderController extends Controller
         );
     }
 
+    /**
+     * Get single order by ID
+     * 
+     * @authenticated
+     * 
+     * @urlParam id required The order ID. Example: 123
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 123,
+     *     "pickup_code": "ABC123",
+     *     "status": "completed",
+     *     "total": 75.50,
+     *     "items": []
+     *   }
+     * }
+     * 
+     * @response 404 {
+     *   "success": false,
+     *   "error": "ORDER_NOT_FOUND",
+     *   "message": "order_not_found"
+     * }
+     */
     public function show($id): JsonResponse
     {
         $customer = auth('api')->user();
@@ -91,6 +178,33 @@ class OrderController extends Controller
         return apiSuccess(new OrderResource($order));
     }
 
+    /**
+     * Get order tracking information
+     * 
+     * @authenticated
+     * 
+     * @urlParam id required The order ID. Example: 123
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "status": "completed",
+     *     "pickup_code": "ABC123",
+     *     "status_history": [
+     *       {
+     *         "status": "received",
+     *         "at": "2025-12-21T10:00:00Z"
+     *       }
+     *     ]
+     *   }
+     * }
+     * 
+     * @response 404 {
+     *   "success": false,
+     *   "error": "ORDER_NOT_FOUND",
+     *   "message": "order_not_found"
+     * }
+     */
     public function tracking($id): JsonResponse
     {
         $customer = auth('api')->user();

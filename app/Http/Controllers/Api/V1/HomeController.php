@@ -21,6 +21,31 @@ class HomeController extends Controller
     ) {
     }
 
+    /**
+     * Get home page data
+     * 
+     * Returns active categories and featured products for the home page.
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "categories": [
+     *       {
+     *         "id": 1,
+     *         "name": "Category Name",
+     *         "image": "https://example.com/image.jpg"
+     *       }
+     *     ],
+     *     "featured_products": [
+     *       {
+     *         "id": 1,
+     *         "name": "Product Name",
+     *         "price": 25.50
+     *       }
+     *     ]
+     *   }
+     * }
+     */
     public function index(Request $request): JsonResponse
     {
         // Get active categories

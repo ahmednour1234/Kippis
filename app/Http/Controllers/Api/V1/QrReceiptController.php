@@ -22,6 +22,30 @@ class QrReceiptController extends Controller
     ) {
     }
 
+    /**
+     * Scan QR receipt with image
+     * 
+     * @authenticated
+     * 
+     * @bodyParam receipt_image file required Receipt image (max 5MB). Example: (binary)
+     * @bodyParam receipt_number string required Receipt number. Example: "RCP-123456"
+     * @bodyParam amount number required Receipt amount (min 0). Example: 50.00
+     * @bodyParam points_requested integer required Points requested (min 1). Example: 50
+     * @bodyParam store_id integer optional Store ID. Example: 1
+     * @bodyParam meta array optional Additional metadata. Example: {"notes": "Special order"}
+     * 
+     * @response 201 {
+     *   "success": true,
+     *   "message": "receipt_submitted",
+     *   "data": {
+     *     "id": 1,
+     *     "receipt_number": "RCP-123456",
+     *     "amount": 50.00,
+     *     "points_requested": 50,
+     *     "status": "pending"
+     *   }
+     * }
+     */
     public function scan(Request $request): JsonResponse
     {
         $request->validate([
@@ -50,6 +74,29 @@ class QrReceiptController extends Controller
         return apiSuccess(new QrReceiptResource($receipt), 'receipt_submitted', 201);
     }
 
+    /**
+     * Submit receipt manually (without image)
+     * 
+     * @authenticated
+     * 
+     * @bodyParam receipt_number string required Receipt number. Example: "RCP-123456"
+     * @bodyParam amount number required Receipt amount (min 0). Example: 50.00
+     * @bodyParam points_requested integer required Points requested (min 1). Example: 50
+     * @bodyParam store_id integer optional Store ID. Example: 1
+     * @bodyParam meta array optional Additional metadata. Example: {"notes": "Special order"}
+     * 
+     * @response 201 {
+     *   "success": true,
+     *   "message": "receipt_submitted",
+     *   "data": {
+     *     "id": 1,
+     *     "receipt_number": "RCP-123456",
+     *     "amount": 50.00,
+     *     "points_requested": 50,
+     *     "status": "pending"
+     *   }
+     * }
+     */
     public function manual(Request $request): JsonResponse
     {
         $request->validate([
@@ -75,6 +122,32 @@ class QrReceiptController extends Controller
         return apiSuccess(new QrReceiptResource($receipt), 'receipt_submitted', 201);
     }
 
+    /**
+     * Get receipt history
+     * 
+     * @authenticated
+     * 
+     * @queryParam per_page integer optional Items per page (max 100). Default: 15. Example: 20
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "receipt_number": "RCP-123456",
+     *       "amount": 50.00,
+     *       "points_requested": 50,
+     *       "status": "approved"
+     *     }
+     *   ],
+     *   "pagination": {
+     *     "current_page": 1,
+     *     "per_page": 15,
+     *     "total": 10,
+     *     "last_page": 1
+     *   }
+     * }
+     */
     public function history(Request $request): JsonResponse
     {
         $customer = auth('api')->user();

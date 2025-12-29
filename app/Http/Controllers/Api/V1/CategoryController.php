@@ -18,6 +18,33 @@ class CategoryController extends Controller
     ) {
     }
 
+    /**
+     * Get list of categories
+     * 
+     * @queryParam source string optional Filter by source (all, foodics, manual). Default: "all". Example: "foodics"
+     * @queryParam is_active string optional Filter by active status (0, 1). Default: "1". Example: "1"
+     * @queryParam q string optional Search query. Example: "drinks"
+     * @queryParam sort_by string optional Sort field. Default: "created_at". Example: "name"
+     * @queryParam sort_order string optional Sort order (asc, desc). Default: "desc". Example: "asc"
+     * @queryParam per_page integer optional Items per page (max 100). Default: 15. Example: 20
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": [
+     *     {
+     *       "id": 1,
+     *       "name": "Beverages",
+     *       "image": "https://example.com/image.jpg"
+     *     }
+     *   ],
+     *   "pagination": {
+     *     "current_page": 1,
+     *     "per_page": 15,
+     *     "total": 50,
+     *     "last_page": 4
+     *   }
+     * }
+     */
     public function index(Request $request): JsonResponse
     {
         $filters = [

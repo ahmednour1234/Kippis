@@ -17,6 +17,30 @@ class LoyaltyController extends Controller
     ) {
     }
 
+    /**
+     * Get customer loyalty wallet
+     * 
+     * @authenticated
+     * 
+     * Returns the customer's loyalty points balance and recent transactions.
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1,
+     *     "customer_id": 123,
+     *     "balance": 500,
+     *     "transactions": [
+     *       {
+     *         "id": 1,
+     *         "type": "earned",
+     *         "points": 100,
+     *         "created_at": "2025-12-21T10:00:00Z"
+     *       }
+     *     ]
+     *   }
+     * }
+     */
     public function index(): JsonResponse
     {
         $customer = auth('api')->user();

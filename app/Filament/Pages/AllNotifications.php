@@ -61,12 +61,18 @@ class AllNotifications extends Page implements HasTable
                     ->color('info'),
                 Tables\Columns\TextColumn::make('title')
                     ->label(__('system.title'))
-                    ->formatStateUsing(fn (DatabaseNotification $record) => $record->data['title'] ?? 'Notification')
+                    ->formatStateUsing(function (DatabaseNotification $record) {
+                        $data = is_array($record->data) ? $record->data : json_decode($record->data, true);
+                        return $data['title'] ?? class_basename($record->type) ?? 'Notification';
+                    })
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('body')
                     ->label(__('system.message'))
-                    ->formatStateUsing(fn (DatabaseNotification $record) => $record->data['body'] ?? '')
+                    ->formatStateUsing(function (DatabaseNotification $record) {
+                        $data = is_array($record->data) ? $record->data : json_decode($record->data, true);
+                        return $data['body'] ?? $data['message'] ?? '';
+                    })
                     ->limit(50)
                     ->wrap(),
                 Tables\Columns\TextColumn::make('created_at')

@@ -18,6 +18,27 @@ class MixController extends Controller
     ) {
     }
 
+    /**
+     * Get mix builder options
+     * 
+     * Returns all available modifiers grouped by type (sweetness, fizz, caffeine, extra).
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "sweetness": [
+     *       {
+     *         "id": 1,
+     *         "name": "Low Sugar",
+     *         "price": 0.00
+     *       }
+     *     ],
+     *     "fizz": [],
+     *     "caffeine": [],
+     *     "extra": []
+     *   }
+     * }
+     */
     public function options(): JsonResponse
     {
         $modifiers = $this->modifierRepository->getGroupedByType();
@@ -30,6 +51,25 @@ class MixController extends Controller
         return apiSuccess($data);
     }
 
+    /**
+     * Preview mix price calculation
+     * 
+     * Calculate the total price for a custom mix based on base price and selected modifiers.
+     * 
+     * @bodyParam base_price number required Base product price (min 0). Example: 15.00
+     * @bodyParam modifiers array optional Array of modifier objects. Example: [{"id": 1, "level": 2}]
+     * @bodyParam modifiers.*.id integer required Modifier ID. Example: 1
+     * @bodyParam modifiers.*.level integer optional Modifier level (min 1). Default: 1. Example: 2
+     * 
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "base_price": 15.00,
+     *     "modifiers_price": 5.00,
+     *     "total": 20.00
+     *   }
+     * }
+     */
     public function preview(Request $request): JsonResponse
     {
         $request->validate([
