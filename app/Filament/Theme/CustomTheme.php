@@ -36,12 +36,6 @@ class CustomTheme implements \Filament\Contracts\Plugin
             PanelsRenderHook::HEAD_START,
             fn (): View => view('filament.components.html-direction'),
         );
-        
-        // Register topbar language switcher (before user menu)
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::USER_MENU_BEFORE,
-            fn (): View => view('filament.components.language-switcher-topbar'),
-        );
     }
 
     protected function getThemeAsset(): Asset
