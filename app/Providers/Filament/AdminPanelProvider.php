@@ -68,12 +68,7 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Kippis')
             ->favicon(asset('favicon.ico'))
             ->userMenuItems([
-                \Filament\Navigation\MenuItem::make()
-                    ->label(__('system.language'))
-                    ->icon('heroicon-o-language')
-                    ->url('#')
-                    ->sort(1) // After theme switcher (theme switcher is at 0)
-                    ->view('filament.components.language-switcher-menu-item'),
+                // Language switcher added via render hook
             ])
             ->navigationGroups([
                 __('navigation.groups.system_management'),

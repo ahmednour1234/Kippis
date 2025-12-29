@@ -50,51 +50,7 @@
     direction: rtl;
 }
 
-/* Hide Filament native notification bell */
-.fi-topbar-item button[aria-label*="notification" i],
-.fi-topbar-item button[title*="notification" i],
-.fi-topbar-item [data-notification-bell],
-.fi-topbar-item:has(button[aria-label*="notification" i]) {
-    display: none !important;
-}
-
-/* More specific selector for Filament's native notification bell */
-.fi-topbar-item:has([data-notification-bell]),
-button[data-notification-bell] {
-    display: none !important;
-}
-
-/* Hide Filament's database notification bell (if enabled) */
-.fi-topbar-item[data-notification-bell],
-.fi-topbar-item button[aria-label*="Notifications"],
-.fi-topbar-item button[title*="Notifications"] {
-    display: none !important;
-}
-
-/* Alternative: Hide any topbar item that contains notification-related content */
-.fi-topbar-item:has(svg[class*="bell"]):not(:has([wire\\:id*="notifications-dropdown"])) {
-    display: none !important;
-}
-
-/* Notification Center Bell - Sidebar Layout */
-.fi-topbar-item:has([wire\\:id*="notification-center-bell"]) {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-}
-
-/* Sidebar panel styling */
-.fi-topbar-item:has([wire\\:id*="notification-center-bell"]) [x-show] {
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
-}
-
-/* Prevent text overflow in notification items */
-.fi-topbar-item .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
+/* Filament native notifications are now enabled - no custom notification center */
 
 /* Ensure proper RTL layout */
 .fi-topbar-item[dir="rtl"] {
@@ -105,54 +61,4 @@ button[data-notification-bell] {
 .fi-topbar-item[dir="rtl"] a,
 .fi-topbar-item[dir="rtl"] p {
     text-align: right;
-}
-
-/* Fix notification item layout - prevent stacking */
-.fi-topbar-item [wire\\:id*="notification-center-bell"] button[type="button"] {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.75rem;
-    width: 100%;
-    text-align: right;
-}
-
-/* Ensure icons don't stack */
-.fi-topbar-item [wire\\:id*="notification-center-bell"] .flex-shrink-0 {
-    flex-shrink: 0;
-}
-
-/* Content block should take remaining space */
-.fi-topbar-item [wire\\:id*="notification-center-bell"] .flex-1 {
-    flex: 1 1 0%;
-    min-width: 0;
-}
-
-/* Soft scrollbar for notification dropdown */
-.fi-topbar-item [wire\\:id*="notification-center-bell"] .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-}
-
-.fi-topbar-item [wire\\:id*="notification-center-bell"] .scrollbar-thin::-webkit-scrollbar {
-    width: 6px;
-}
-
-.fi-topbar-item [wire\\:id*="notification-center-bell"] .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.fi-topbar-item [wire\\:id*="notification-center-bell"] .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgba(156, 163, 175, 0.4);
-    border-radius: 10px;
-    transition: background-color 0.2s;
-}
-
-.fi-topbar-item [wire\\:id*="notification-center-bell"] .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(156, 163, 175, 0.6);
-}
-
-/* Soft dropdown shadow enhancement */
-.fi-topbar-item [wire\\:id*="notification-center-bell"] [x-ref="dropdown"] {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
 }
