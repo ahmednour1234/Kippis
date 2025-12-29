@@ -17,7 +17,10 @@ class NotificationCenterResource extends Resource
 {
     protected static ?string $model = NotificationCenter::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-bell';
+    public static function getNavigationIcon(): ?string
+    {
+        return 'heroicon-o-bell';
+    }
 
     public static function getNavigationLabel(): string
     {
