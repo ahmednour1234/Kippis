@@ -16,23 +16,22 @@
         "
     >
         <x-slot name="trigger">
-            <div class="relative">
-                <x-filament::icon-button
+            <button
+                type="button"
+                class="fi-topbar-item-button fi-topbar-item-button-label group relative flex items-center justify-center rounded-lg p-2 text-sm font-medium outline-none transition duration-75 hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-white/5 dark:focus:bg-white/5"
+                aria-label="{{ __('system.notifications') }}"
+                title="{{ __('system.notifications') }}"
+            >
+                <x-filament::icon
                     icon="heroicon-o-bell"
-                    :label="__('system.notifications')"
-                    color="gray"
-                    size="lg"
+                    class="h-5 w-5 transition-colors duration-75 group-hover:text-primary-600 dark:group-hover:text-primary-400"
                 />
                 @if($unreadCount > 0)
-                    <x-filament::badge
-                        color="danger"
-                        size="sm"
-                        class="absolute -top-1 -right-1 min-w-[1.25rem] h-5 px-1 flex items-center justify-center text-[10px] font-bold ring-2 ring-white dark:ring-gray-900"
-                    >
+                    <span class="absolute -top-0.5 -right-0.5 flex min-h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-danger-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-gray-900">
                         {{ $unreadCount > 99 ? '99+' : $unreadCount }}
-                    </x-filament::badge>
+                    </span>
                 @endif
-            </div>
+            </button>
         </x-slot>
 
         <div {{ $isRtl ? 'dir="rtl"' : '' }} class="w-[420px] max-h-[600px] flex flex-col">

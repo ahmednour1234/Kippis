@@ -137,12 +137,35 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Topbar Items - Proper Spacing and Alignment */
+.fi-topbar-item {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.fi-topbar-item + .fi-topbar-item {
+    margin-left: 0.5rem;
+}
+
 .fi-topbar-item-button {
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.5rem;
+    width: 2.5rem;
 }
 
 .fi-topbar-item-button:hover {
     transform: translateY(-1px);
+}
+
+/* Notification Badge Positioning */
+.fi-topbar-item-button .absolute {
+    top: -0.125rem;
+    right: -0.125rem;
+    z-index: 10;
 }
 
 /* Modern Button Styles */
