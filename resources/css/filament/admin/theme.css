@@ -85,11 +85,15 @@ button[data-notification-bell] {
 
 /* Ensure dropdown is properly positioned and doesn't stack */
 .fi-topbar-item:has([wire\\:id*="notification-center-bell"]) [x-show] {
-    position: absolute !important;
-    top: 100% !important;
-    right: 0 !important;
-    margin-top: 0.5rem !important;
+    position: fixed !important;
     z-index: 9999 !important;
+}
+
+/* Allow dropdown to escape topbar overflow */
+.fi-topbar,
+.fi-topbar-items,
+.fi-topbar-item:has([wire\\:id*="notification-center-bell"]) {
+    overflow: visible !important;
 }
 
 /* Prevent text overflow in notification items */

@@ -1,12 +1,26 @@
 <div
     class="fi-topbar-item relative"
-    x-data="{ open: false }"
+    x-data="{
+        open: false,
+        positionDropdown() {
+            if (!this.open) return;
+            const button = this.$refs.bellButton;
+            const dropdown = this.$refs.dropdown;
+            if (button && dropdown) {
+                const rect = button.getBoundingClientRect();
+                dropdown.style.right = (window.innerWidth - rect.right) + 'px';
+                dropdown.style.top = (rect.bottom + 8) + 'px';
+            }
+        }
+    }"
+    @resize.window="positionDropdown()"
     wire:poll.30s="loadNotifications"
     dir="rtl"
 >
     <!-- Bell Icon Button -->
     <button
-        @click="open = !open"
+        x-ref="bellButton"
+        @click="open = !open; $nextTick(() => positionDropdown())"
         type="button"
         class="fi-topbar-item-button fi-topbar-item-button-label group relative flex items-center justify-center rounded-lg p-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-gray-50 focus:bg-gray-50 dark:hover:bg-white/5 dark:focus:bg-white/5"
         aria-label="الإشعارات"
@@ -25,6 +39,7 @@
 
     <!-- Dropdown Panel -->
     <div
+        x-ref="dropdown"
         x-show="open"
         @click.away="open = false"
         x-transition:enter="transition ease-out duration-200"
@@ -33,7 +48,7 @@
         x-transition:leave="transition ease-in duration-150"
         x-transition:leave-start="opacity-100 scale-100"
         x-transition:leave-end="opacity-0 scale-95"
-        class="absolute right-0 top-full mt-2 w-[420px] max-w-[90vw] rounded-xl bg-white shadow-xl ring-1 ring-black/5 dark:bg-gray-900 dark:ring-white/10 z-[9999] overflow-hidden"
+        class="fixed w-[420px] max-w-[90vw] rounded-xl bg-white shadow-xl ring-1 ring-black/5 dark:bg-gray-900 dark:ring-white/10 z-[9999] overflow-hidden"
         style="display: none;"
         dir="rtl"
     >
