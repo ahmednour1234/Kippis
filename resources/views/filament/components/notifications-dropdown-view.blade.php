@@ -213,14 +213,14 @@
             @endif
         </div>
     </x-filament::dropdown>
-</div>
 
-{{-- Optional: nicer scrollbar for this dropdown only --}}
-<style>
-    .kippis-notification-scrollbar::-webkit-scrollbar { width: 8px; }
-    .kippis-notification-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .kippis-notification-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, .35); border-radius: 999px; }
-    .kippis-notification-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, .55); }
-    .dark .kippis-notification-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, .22); }
-    .dark .kippis-notification-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, .35); }
-</style>
+    {{-- Optional: nicer scrollbar for this dropdown only --}}
+    <style>
+        .kippis-notification-scrollbar::-webkit-scrollbar { width: 8px; }
+        .kippis-notification-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .kippis-notification-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, .35); border-radius: 999px; }
+        .kippis-notification-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, .55); }
+        .dark .kippis-notification-scrollbar::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, .22); }
+        .dark .kippis-notification-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, .35); }
+    </style>
+</div>
