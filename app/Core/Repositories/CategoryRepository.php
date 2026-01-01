@@ -35,6 +35,9 @@ class CategoryRepository
             }
         }
 
+        // Only get categories that have products
+        $query->whereHas('products');
+
         // Search
         if (isset($filters['q']) && $filters['q']) {
             $q = $filters['q'];
@@ -79,6 +82,9 @@ class CategoryRepository
                 $query->foodics();
             }
         }
+
+        // Only get categories that have products
+        $query->whereHas('products');
 
         return $query->get();
     }
