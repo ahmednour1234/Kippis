@@ -50,13 +50,17 @@ class CartSeeder extends Seeder
             foreach ($selectedProducts as $product) {
                 $quantity = rand(1, 3);
                 $price = $product->base_price;
-                
+
                 CartItem::create([
                     'cart_id' => $cart->id,
                     'product_id' => $product->id,
                     'quantity' => $quantity,
                     'price' => $price,
                     'modifiers_snapshot' => [],
+                    'item_type' => 'product',
+                    'ref_id' => $product->id,
+                    'name' => $product->name_json['en'] ?? $product->name,
+                    'configuration' => null,
                 ]);
             }
 
@@ -86,13 +90,17 @@ class CartSeeder extends Seeder
             foreach ($selectedProducts as $product) {
                 $quantity = rand(1, 2);
                 $price = $product->base_price;
-                
+
                 CartItem::create([
                     'cart_id' => $cart->id,
                     'product_id' => $product->id,
                     'quantity' => $quantity,
                     'price' => $price,
                     'modifiers_snapshot' => [],
+                    'item_type' => 'product',
+                    'ref_id' => $product->id,
+                    'name' => $product->name_json['en'] ?? $product->name,
+                    'configuration' => null,
                 ]);
             }
 
