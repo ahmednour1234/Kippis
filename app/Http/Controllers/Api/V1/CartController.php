@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Core\Repositories\CartRepository;
 use App\Core\Repositories\ProductRepository;
 use App\Core\Repositories\PromoCodeRepository;
+use App\Services\MixPriceCalculator;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\CartResource;
 use Illuminate\Http\JsonResponse;
@@ -18,15 +19,16 @@ class CartController extends Controller
     public function __construct(
         private CartRepository $cartRepository,
         private ProductRepository $productRepository,
-        private PromoCodeRepository $promoCodeRepository
+        private PromoCodeRepository $promoCodeRepository,
+        private MixPriceCalculator $mixPriceCalculator
     ) {
     }
 
     /**
      * Initialize a new cart
-     * 
+     *
      * @bodyParam store_id integer required The store ID. Example: 1
-     * 
+     *
      * @response 201 {
      *   "success": true,
      *   "message": "cart_initialized",
@@ -59,7 +61,7 @@ class CartController extends Controller
 
     /**
      * Get current active cart
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "data": {
@@ -69,7 +71,7 @@ class CartController extends Controller
      *     "total": 0
      *   }
      * }
-     * 
+     *
      * @response 404 {
      *   "success": false,
      *   "error": "CART_NOT_FOUND",
@@ -89,20 +91,25 @@ class CartController extends Controller
 
         // Recalculate totals to ensure they are up to date
         $this->cartRepository->recalculate($cart);
-        
-        // Refresh cart with all relationships to get updated totals
-        $cart = $cart->fresh(['items.product', 'promoCode']);
 
-        return apiSuccess(new CartResource($cart));
+        return apiSuccess(new CartResource($cart->fresh(['items.product', 'promoCode'])));
     }
 
     /**
      * Add item to cart
-     * 
-     * @bodyParam product_id integer required The product ID. Example: 1
+     *
+     * Backwards-compatible: if `item_type` is not provided, the controller expects `product_id` + `quantity`.
+     *
+     * Request examples:
+     * - Product: {"product_id":1,"quantity":2}
+     * - Mix: {"item_type":"mix","quantity":1,"configuration": {"base_id":1,"modifiers":[{"id":2,"level":1}]}}
+     * - Creator mix: {"item_type":"creator_mix","quantity":1,"configuration": {"creator_mix_id":4}}
+     *
+     * @bodyParam item_type string optional Item type: product|mix|creator_mix. Example: mix
+     * @bodyParam product_id integer required_if:item_type,product The product ID. Example: 1
      * @bodyParam quantity integer required Quantity (min 1). Example: 2
-     * @bodyParam modifiers array optional Array of modifier IDs. Example: [1, 2, 3]
-     * 
+     * @bodyParam configuration object optional Configuration snapshot for mix or creator_mix. Example: {"base_id":1}
+     *
      * @response 201 {
      *   "success": true,
      *   "message": "item_added",
@@ -112,7 +119,7 @@ class CartController extends Controller
      *     "total": 25.50
      *   }
      * }
-     * 
+     *
      * @response 400 {
      *   "success": false,
      *   "error": "PRODUCT_INACTIVE",
@@ -121,10 +128,46 @@ class CartController extends Controller
      */
     public function addItem(Request $request): JsonResponse
     {
+        // Backwards-compatible product-only flow when item_type is not provided
+        if (!$request->has('item_type')) {
+            $request->validate([
+                'product_id' => 'required|exists:products,id',
+                'quantity' => 'required|integer|min:1',
+                'modifiers' => 'array',
+            ]);
+
+            $customer = auth('api')->user();
+            $sessionId = session()->getId();
+
+            $cart = $this->cartRepository->findActiveCart($customer?->id, $sessionId);
+
+            if (!$cart) {
+                return apiError('CART_NOT_FOUND', 'cart_not_found', 404);
+            }
+
+            $product = $this->productRepository->findById($request->input('product_id'));
+            if (!$product || !$product->is_active) {
+                return apiError('PRODUCT_INACTIVE', 'product_inactive', 400);
+            }
+
+            $this->cartRepository->addItem(
+                $cart,
+                $product->id,
+                $request->input('quantity'),
+                $request->input('modifiers', [])
+            );
+
+            $this->cartRepository->recalculate($cart);
+
+            return apiSuccess(new CartResource($cart->fresh(['items.product', 'promoCode'])), 'item_added', 201);
+        }
+
+        // Unified add-item flow
         $request->validate([
-            'product_id' => 'required|exists:products,id',
+            'item_type' => 'required|in:product,mix,creator_mix',
             'quantity' => 'required|integer|min:1',
-            'modifiers' => 'array',
+            'configuration' => 'required_if:item_type,mix,creator_mix|array',
+            'product_id' => 'required_if:item_type,product|exists:products,id',
         ]);
 
         $customer = auth('api')->user();
@@ -136,33 +179,60 @@ class CartController extends Controller
             return apiError('CART_NOT_FOUND', 'cart_not_found', 404);
         }
 
-        $product = $this->productRepository->findById($request->input('product_id'));
-        if (!$product || !$product->is_active) {
-            return apiError('PRODUCT_INACTIVE', 'product_inactive', 400);
+        $itemType = $request->input('item_type');
+        $quantity = $request->input('quantity', 1);
+
+        if ($itemType === 'product') {
+            $product = $this->productRepository->findById($request->input('product_id'));
+            if (!$product || !$product->is_active) {
+                return apiError('PRODUCT_INACTIVE', 'product_inactive', 400);
+            }
+
+            $payload = [
+                'product_id' => $product->id,
+                'quantity' => $quantity,
+                'price' => (float)$product->base_price,
+                'item_type' => 'product',
+                'ref_id' => $product->id,
+                'name' => $product->name_json['en'] ?? $product->name,
+            ];
+
+            $this->cartRepository->addItemUnified($cart, $payload);
+            $this->cartRepository->recalculate($cart);
+
+            return apiSuccess(new CartResource($cart->fresh(['items.product', 'promoCode'])), 'item_added', 201);
         }
 
-        $this->cartRepository->addItem(
-            $cart,
-            $product->id,
-            $request->input('quantity'),
-            $request->input('modifiers', [])
-        );
+        // mix or creator_mix: must provide configuration (snapshot)
+        $configuration = $request->input('configuration', []);
 
-        // Recalculate cart totals after adding item
+        try {
+            $calculated = $this->mixPriceCalculator->calculate($configuration);
+        } catch (\Exception $e) {
+            return apiError('INVALID_CONFIGURATION', $e->getMessage(), 400);
+        }
+
+        $payload = [
+            'quantity' => $quantity,
+            'price' => $calculated['total'],
+            'item_type' => $itemType,
+            'ref_id' => $request->input('ref_id'),
+            'name' => $request->input('name') ?? ($itemType === 'creator_mix' ? 'Creator Mix' : 'Custom Mix'),
+            'configuration' => $configuration,
+        ];
+
+        $this->cartRepository->addItemUnified($cart, $payload);
         $this->cartRepository->recalculate($cart);
 
-        // Refresh cart with all relationships to get updated totals
-        $cart = $cart->fresh(['items.product', 'promoCode']);
-
-        return apiSuccess(new CartResource($cart), 'item_added', 201);
+        return apiSuccess(new CartResource($cart->fresh(['items.product', 'promoCode'])), 'item_added', 201);
     }
 
     /**
      * Update cart item quantity
-     * 
+     *
      * @urlParam id required The cart item ID. Example: 1
      * @bodyParam quantity integer required New quantity (min 1). Example: 3
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "item_updated",
@@ -190,21 +260,16 @@ class CartController extends Controller
 
         $cartItem = $cart->items()->findOrFail($id);
         $this->cartRepository->updateItem($cartItem, ['quantity' => $request->input('quantity')]);
-        
-        // Recalculate cart totals after updating item
         $this->cartRepository->recalculate($cart);
-        
-        // Refresh cart with all relationships to get updated totals
-        $cart = $cart->fresh(['items.product', 'promoCode']);
 
-        return apiSuccess(new CartResource($cart), 'item_updated');
+        return apiSuccess(new CartResource($cart->fresh(['items.product', 'promoCode'])), 'item_updated');
     }
 
     /**
      * Remove item from cart
-     * 
+     *
      * @urlParam id required The cart item ID. Example: 1
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "item_removed",
@@ -228,21 +293,16 @@ class CartController extends Controller
 
         $cartItem = $cart->items()->findOrFail($id);
         $this->cartRepository->removeItem($cartItem);
-        
-        // Recalculate cart totals after removing item
         $this->cartRepository->recalculate($cart);
-        
-        // Refresh cart with all relationships to get updated totals
-        $cart = $cart->fresh(['items.product', 'promoCode']);
 
-        return apiSuccess(new CartResource($cart), 'item_removed');
+        return apiSuccess(new CartResource($cart->fresh(['items.product', 'promoCode'])), 'item_removed');
     }
 
     /**
      * Apply promo code to cart
-     * 
+     *
      * @bodyParam code string required Promo code. Example: "SAVE20"
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "promo_applied",
@@ -253,7 +313,7 @@ class CartController extends Controller
      *     "total": 65.50
      *   }
      * }
-     * 
+     *
      * @response 400 {
      *   "success": false,
      *   "error": "INVALID_PROMO_CODE",
@@ -290,19 +350,14 @@ class CartController extends Controller
         }
 
         $this->cartRepository->applyPromoCode($cart, $promoCode);
-        
-        // Recalculate cart totals after applying promo code
         $this->cartRepository->recalculate($cart);
-        
-        // Refresh cart with all relationships to get updated totals
-        $cart = $cart->fresh(['items.product', 'promoCode']);
 
-        return apiSuccess(new CartResource($cart), 'promo_applied');
+        return apiSuccess(new CartResource($cart->fresh(['items.product', 'promoCode'])), 'promo_applied');
     }
 
     /**
      * Remove promo code from cart
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "promo_removed",
@@ -325,19 +380,14 @@ class CartController extends Controller
         }
 
         $this->cartRepository->removePromoCode($cart);
-        
-        // Recalculate cart totals after removing promo code
         $this->cartRepository->recalculate($cart);
-        
-        // Refresh cart with all relationships to get updated totals
-        $cart = $cart->fresh(['items.product', 'promoCode']);
 
-        return apiSuccess(new CartResource($cart), 'promo_removed');
+        return apiSuccess(new CartResource($cart->fresh(['items.product', 'promoCode'])), 'promo_removed');
     }
 
     /**
      * Abandon/clear cart
-     * 
+     *
      * @response 200 {
      *   "success": true,
      *   "message": "cart_abandoned"

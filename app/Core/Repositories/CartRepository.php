@@ -44,13 +44,41 @@ class CartRepository
     {
         $product = Product::findOrFail($productId);
 
-        return CartItem::create([
-            'cart_id' => $cart->id,
+        $payload = [
             'product_id' => $product->id,
             'quantity' => $quantity,
-            'price' => $product->base_price,
+            'price' => (float) $product->base_price,
             'modifiers_snapshot' => $modifiers,
-        ]);
+            'item_type' => 'product',
+            'ref_id' => $product->id,
+            'name' => $product->name_json['en'] ?? $product->name,
+            'configuration' => null,
+        ];
+
+        return $this->addItemUnified($cart, $payload);
+    }
+
+    /**
+     * Unified add item API. Accepts payload with item_type and configuration. Price must be provided
+     * or computed by caller (e.g., MixPriceCalculator) before calling this method.
+     *
+     * $payload keys: item_type, ref_id, name, price, quantity, configuration (array)
+     */
+    public function addItemUnified(Cart $cart, array $payload): CartItem
+    {
+        $data = [
+            'cart_id' => $cart->id,
+            'product_id' => $payload['product_id'] ?? null,
+            'quantity' => $payload['quantity'] ?? 1,
+            'price' => $payload['price'] ?? 0.0,
+            'modifiers_snapshot' => $payload['modifiers_snapshot'] ?? null,
+            'item_type' => $payload['item_type'] ?? 'product',
+            'ref_id' => $payload['ref_id'] ?? null,
+            'name' => $payload['name'] ?? null,
+            'configuration' => $payload['configuration'] ?? null,
+        ];
+
+        return CartItem::create($data);
     }
 
     /**
@@ -98,18 +126,15 @@ class CartRepository
      */
     public function recalculate(Cart $cart): void
     {
-        // Refresh items relationship to ensure we have the latest items
-        $cart->load('items');
-        
-        // Ensure promoCode relationship is loaded
+        // Ensure items and promoCode relationships are loaded
+        if (!$cart->relationLoaded('items')) {
+            $cart->load('items');
+        }
         if (!$cart->relationLoaded('promoCode')) {
             $cart->load('promoCode');
         }
-        
+
         $cart->recalculate();
-        
-        // Refresh the cart model to get updated totals
-        $cart->refresh();
     }
 }
 

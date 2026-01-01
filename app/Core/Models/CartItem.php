@@ -16,6 +16,11 @@ class CartItem extends Model
         'quantity',
         'price',
         'modifiers_snapshot',
+        // unified fields
+        'item_type',
+        'ref_id',
+        'name',
+        'configuration',
     ];
 
     protected function casts(): array
@@ -24,6 +29,7 @@ class CartItem extends Model
             'quantity' => 'integer',
             'price' => 'decimal:2',
             'modifiers_snapshot' => 'array',
+            'configuration' => 'array',
         ];
     }
 
