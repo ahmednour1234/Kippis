@@ -6,7 +6,10 @@ use App\Core\Repositories\LoyaltyWalletRepository;
 use App\Core\Repositories\QrReceiptRepository;
 use App\Helpers\FileHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\ScanQrCodeRequest;
+use App\Http\Resources\Api\V1\QrCodeRedemptionResource;
 use App\Http\Resources\Api\V1\QrReceiptResource;
+use App\Services\QrCodeRedemptionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -18,64 +21,106 @@ class QrReceiptController extends Controller
     public function __construct(
         private QrReceiptRepository $qrReceiptRepository,
         private LoyaltyWalletRepository $loyaltyWalletRepository,
-        private FileHelper $fileHelper
+        private FileHelper $fileHelper,
+        private QrCodeRedemptionService $qrCodeRedemptionService
     ) {
     }
 
     /**
-     * Scan QR receipt with image
+     * Scan QR code
+     * 
+     * Scan a QR code to redeem points. The QR code must be active, within validity dates, and not exceed usage limits.
      * 
      * @authenticated
      * 
-     * @bodyParam receipt_image file required Receipt image file (max 5MB, formats: jpg, jpeg, png, gif). No-example
-     * @bodyParam receipt_number string required Receipt number. Example: "RCP-123456"
-     * @bodyParam amount number required Receipt amount (min 0). Example: 50.00
-     * @bodyParam points_requested integer required Points requested (min 1). Example: 50
-     * @bodyParam store_id integer optional Store ID. Example: 1
-     * @bodyParam meta array optional Additional metadata. Example: {"notes": "Special order"}
+     * @bodyParam code string required The QR code string to scan. Example: "QR-ABC123"
      * 
-     * @response 201 {
+     * @response 200 {
      *   "success": true,
-     *   "message": "receipt_submitted",
+     *   "message": "QR code redeemed successfully.",
      *   "data": {
-     *     "id": 1,
-     *     "receipt_number": "RCP-123456",
-     *     "amount": 50.00,
-     *     "points_requested": 50,
-     *     "status": "pending"
+     *     "qr_code": {
+     *       "id": 1,
+     *       "code": "QR-ABC123",
+     *       "title": "Welcome Bonus",
+     *       "points_awarded": 50
+     *     },
+     *     "usage": {
+     *       "id": 1,
+     *       "used_at": "2026-01-03T18:30:00Z"
+     *     },
+     *     "remaining_limits": {
+     *       "total": 99,
+     *       "per_customer": 4
+     *     }
      *   }
      * }
+     * 
+     * @response 400 {
+     *   "success": false,
+     *   "error": "QR_CODE_NOT_FOUND",
+     *   "message": "QR code not found."
+     * }
+     * 
+     * @response 400 {
+     *   "success": false,
+     *   "error": "QR_CODE_INACTIVE",
+     *   "message": "QR code is not active."
+     * }
+     * 
+     * @response 400 {
+     *   "success": false,
+     *   "error": "QR_CODE_NOT_STARTED",
+     *   "message": "QR code has not started yet."
+     * }
+     * 
+     * @response 400 {
+     *   "success": false,
+     *   "error": "QR_CODE_EXPIRED",
+     *   "message": "QR code has expired."
+     * }
+     * 
+     * @response 400 {
+     *   "success": false,
+     *   "error": "QR_CODE_PER_CUSTOMER_LIMIT_EXCEEDED",
+     *   "message": "You have reached the maximum uses for this QR code."
+     * }
+     * 
+     * @response 400 {
+     *   "success": false,
+     *   "error": "QR_CODE_TOTAL_LIMIT_EXCEEDED",
+     *   "message": "QR code has reached its total usage limit."
+     * }
      */
-    public function scan(Request $request): JsonResponse
+    public function scan(ScanQrCodeRequest $request): JsonResponse
     {
-        $request->validate([
-            'receipt_image' => 'required|image|max:5120',
-            'receipt_number' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
-            'points_requested' => 'required|integer|min:1',
-            'meta' => 'nullable|array',
-        ]);
-
         $customer = auth('api')->user();
-        $imagePath = $this->fileHelper->uploadImage($request->file('receipt_image'), 'qr_receipts', 'public', 5120);
 
-        $receipt = $this->qrReceiptRepository->create([
-            'customer_id' => $customer->id,
-            'store_id' => $request->input('store_id'),
-            'receipt_number' => $request->input('receipt_number'),
-            'receipt_image' => $imagePath,
-            'amount' => $request->input('amount'),
-            'points_requested' => $request->input('points_requested'),
-            'meta' => $request->input('meta'),
-            'scanned_at' => now(),
-            'status' => 'pending',
-        ]);
+        if (!$customer) {
+            return apiError('UNAUTHORIZED', 'unauthorized', 401);
+        }
 
-        return apiSuccess(new QrReceiptResource($receipt), 'receipt_submitted', 201);
+        $code = $request->validated()['code'];
+        $result = $this->qrCodeRedemptionService->redeem($customer, $code);
+
+        if (!$result['success']) {
+            return apiError(
+                $result['error_code'] ?? 'REDEMPTION_FAILED',
+                $result['message'] ?? 'Redemption failed',
+                400
+            );
+        }
+
+        return apiSuccess(
+            new QrCodeRedemptionResource($result['data']),
+            $result['message']
+        );
     }
 
     /**
      * Submit receipt manually (without image)
+     * 
+     * @deprecated This endpoint is deprecated. Use /scan with code parameter instead.
      * 
      * @authenticated
      * 
