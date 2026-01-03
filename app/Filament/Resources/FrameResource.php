@@ -180,9 +180,9 @@ class FrameResource extends Resource
                     ->query(fn ($query) => $query->where('starts_at', '>', now())),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Actions\ViewAction::make(),
+                Actions\EditAction::make(),
+                Actions\DeleteAction::make(),
             ])
             ->defaultSort('sort_order')
             ->defaultSort('id', 'desc');
