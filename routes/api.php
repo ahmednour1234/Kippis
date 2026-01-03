@@ -65,9 +65,7 @@ Route::middleware('api.locale')->group(function () {
     // ==================== FRAMES APIs ====================
     Route::prefix('v1/frames')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\FrameController::class, 'index']);
-        Route::middleware('auth:api')->group(function () {
-            Route::post('/render', [\App\Http\Controllers\Api\V1\FrameController::class, 'render']);
-        });
+        Route::post('/render', [\App\Http\Controllers\Api\V1\FrameController::class, 'render']);
     });
 
     // ==================== CART APIs ====================
@@ -101,11 +99,6 @@ Route::middleware('api.locale')->group(function () {
     Route::middleware('auth:api')->prefix('v1/loyalty')->group(function () {
         Route::get('/', [\App\Http\Controllers\Api\V1\LoyaltyController::class, 'index']);
         Route::post('/redeem', [\App\Http\Controllers\Api\V1\LoyaltyController::class, 'redeem']);
-    });
-
-    // ==================== PROMOTIONAL QR CODES APIs ====================
-    Route::middleware('auth:api')->prefix('v1/promo-qr')->group(function () {
-        Route::post('/scan', [\App\Http\Controllers\Api\V1\PromoQrController::class, 'scan']);
     });
 
     // ==================== QR CODES APIs ====================
