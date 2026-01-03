@@ -131,6 +131,16 @@ class ProductResource extends Resource
                             ->disk('public')
                             ->maxSize(2048)
                             ->imageEditor(),
+                        Forms\Components\Select::make('product_kind')
+                            ->label(__('system.product_kind'))
+                            ->options([
+                                'regular' => __('system.regular'),
+                                'mix_base' => __('system.mix_base'),
+                            ])
+                            ->default('regular')
+                            ->required()
+                            ->disabled(fn ($record) => $record && $record->external_source === 'foodics')
+                            ->helperText(__('system.product_kind_helper')),
                         Forms\Components\TextInput::make('base_price')
                             ->label(__('system.base_price'))
                             ->numeric()
@@ -186,6 +196,21 @@ class ProductResource extends Resource
                     ->getStateUsing(fn ($record) => $record->category?->getName(app()->getLocale()))
                     ->searchable(query: fn ($query, string $search) => $query->whereHas('category', fn ($q) => $q->where('name_json->en', 'like', "%{$search}%")->orWhere('name_json->ar', 'like', "%{$search}%")))
                     ->sortable(),
+                Tables\Columns\TextColumn::make('product_kind')
+                    ->label(__('system.product_kind'))
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'regular' => 'success',
+                        'mix_base' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'regular' => __('system.regular'),
+                        'mix_base' => __('system.mix_base'),
+                        default => $state,
+                    })
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('base_price')
                     ->label(__('system.base_price'))
                     ->money('SAR')
@@ -229,6 +254,12 @@ class ProductResource extends Resource
                         'local' => __('system.local'),
                         'foodics' => __('system.foodics'),
                     ]),
+                Tables\Filters\SelectFilter::make('product_kind')
+                    ->label(__('system.product_kind'))
+                    ->options([
+                        'regular' => __('system.regular'),
+                        'mix_base' => __('system.mix_base'),
+                    ]),
                 Tables\Filters\Filter::make('base_price')
                     ->form([
                         Forms\Components\TextInput::make('price_from')
@@ -267,7 +298,8 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            ProductResource\RelationManagers\ProductAddonsRelationManager::class,
+            ProductResource\RelationManagers\MixBuilderBasesRelationManager::class,
         ];
     }
 
