@@ -27,6 +27,8 @@ class AddMixToCartRequest extends FormRequest
             'configuration' => 'required_if:item_type,mix,creator_mix|array',
             'configuration.base_id' => 'nullable|exists:products,id',
             'configuration.base_price' => 'nullable|numeric|min:0',
+            'configuration.builder_id' => 'nullable|integer',
+            'configuration.mix_builder_id' => 'nullable|integer',
             'configuration.modifiers' => 'nullable|array',
             'configuration.modifiers.*.id' => 'required_with:configuration.modifiers|exists:modifiers,id',
             'configuration.modifiers.*.level' => 'nullable|integer|min:0',

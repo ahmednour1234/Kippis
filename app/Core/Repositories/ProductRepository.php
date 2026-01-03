@@ -26,6 +26,11 @@ class ProductRepository
             $query->active();
         }
 
+        // Exclude mix bases from regular product listings unless explicitly requested
+        if (!isset($filters['include_bases']) || $filters['include_bases'] !== true) {
+            $query->regular(); // Only show regular products by default
+        }
+
         // Filter by source
         if (isset($filters['source'])) {
             if ($filters['source'] === 'local') {
@@ -90,6 +95,11 @@ class ProductRepository
     public function getAllActive(array $filters = []): Collection
     {
         $query = Product::with('category')->active();
+
+        // Exclude mix bases from regular product listings unless explicitly requested
+        if (!isset($filters['include_bases']) || $filters['include_bases'] !== true) {
+            $query->regular();
+        }
 
         if (isset($filters['category_id'])) {
             $query->where('category_id', $filters['category_id']);

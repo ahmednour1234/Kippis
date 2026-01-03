@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Core\Repositories\ModifierRepository;
+use App\Core\Models\Product;
+use App\Core\Models\MixBuilderBase;
 use App\Services\MixPriceCalculator;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\PreviewMixRequest;
@@ -24,34 +26,81 @@ class MixController extends Controller
     /**
      * Get mix builder options
      *
-     * Returns all available modifiers grouped by type (sweetness, fizz, caffeine, extra).
+     * Returns all available bases and modifiers grouped by type (sweetness, fizz, caffeine, extra).
+     * Bases are products marked as `product_kind = mix_base`.
+     *
+     * @queryParam builder_id integer optional Filter bases by specific builder ID. Example: 1
      *
      * @response 200 {
      *   "success": true,
      *   "data": {
-     *     "sweetness": [
+     *     "bases": [
      *       {
      *         "id": 1,
-     *         "name": "Low Sugar",
-     *         "price": 0.00
+     *         "name": "Base Name",
+     *         "image": "url",
+     *         "description": "Description",
+     *         "base_price": 15.00
      *       }
      *     ],
-     *     "fizz": [],
-     *     "caffeine": [],
-     *     "extra": []
+     *     "modifiers": {
+     *       "sweetness": [
+     *         {
+     *           "id": 1,
+     *           "name": "Low Sugar",
+     *           "price": 0.00
+     *         }
+     *       ],
+     *       "fizz": [],
+     *       "caffeine": [],
+     *       "extra": []
+     *     }
      *   }
      * }
      */
-    public function options(): JsonResponse
+    public function options(Request $request): JsonResponse
     {
+        $builderId = $request->query('builder_id');
+        
+        // Get bases (mix_base products)
+        $basesQuery = Product::active()->mixBases();
+        
+        // Filter by builder if provided
+        if ($builderId) {
+            $baseIds = MixBuilderBase::where(function ($query) use ($builderId) {
+                $query->where('mix_builder_id', $builderId)
+                      ->orWhereNull('mix_builder_id'); // Global bases (null) available to all
+            })->pluck('product_id');
+            
+            $basesQuery->whereIn('id', $baseIds);
+        }
+        
+        $bases = $basesQuery->get()->map(function ($product) {
+            return [
+                'id' => $product->id,
+                'name' => $product->getName(app()->getLocale()),
+                'name_ar' => $product->getName('ar'),
+                'name_en' => $product->getName('en'),
+                'image' => $product->image ? asset('storage/' . $product->image) : null,
+                'description' => $product->getDescription(app()->getLocale()),
+                'description_ar' => $product->getDescription('ar'),
+                'description_en' => $product->getDescription('en'),
+                'base_price' => (float) $product->base_price,
+            ];
+        });
+
+        // Get modifiers grouped by type
         $modifiers = $this->modifierRepository->getGroupedByType();
 
-        $data = [];
+        $modifiersData = [];
         foreach (['sweetness', 'fizz', 'caffeine', 'extra'] as $type) {
-            $data[$type] = ModifierResource::collection($modifiers[$type]);
+            $modifiersData[$type] = ModifierResource::collection($modifiers[$type]);
         }
 
-        return apiSuccess($data);
+        return apiSuccess([
+            'bases' => $bases,
+            'modifiers' => $modifiersData,
+        ]);
     }
 
     /**
@@ -79,8 +128,10 @@ class MixController extends Controller
      * ```
      *
      * @bodyParam configuration object required Configuration snapshot for the mix. Example: {"base_id":1,"modifiers":[{"id":2,"level":1}],"extras":[3]}
-     * @bodyParam configuration.base_id integer optional Base product ID (preferred). Example: 1
+     * @bodyParam configuration.base_id integer optional Base product ID (preferred). Must be a product with product_kind = mix_base. Example: 1
      * @bodyParam configuration.base_price number optional Deprecated. Raw base price for backward compatibility. Example: 15.00
+     * @bodyParam configuration.builder_id integer optional Mix builder ID to validate base belongs to builder. Example: 1
+     * @bodyParam configuration.mix_builder_id integer optional Alias for builder_id. Example: 1
      * @bodyParam configuration.modifiers array optional Array of modifier configurations. Example: [{"id": 2, "level": 3}]
      * @bodyParam configuration.modifiers.*.id integer required Modifier ID. Example: 2
      * @bodyParam configuration.modifiers.*.level integer optional Modifier level (0 to max_level). Default: 1. Example: 3

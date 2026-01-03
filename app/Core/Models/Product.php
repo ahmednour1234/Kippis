@@ -31,6 +31,7 @@ class Product extends Model
         'external_source',
         'foodics_id',
         'last_synced_at',
+        'product_kind',
     ];
 
     protected function casts(): array
@@ -129,6 +130,30 @@ class Product extends Model
         return $this->belongsToMany(Modifier::class, 'product_modifier_groups')
             ->withPivot('is_required', 'min_select', 'max_select')
             ->withTimestamps();
+    }
+
+    /**
+     * Scope: Mix base products.
+     */
+    public function scopeMixBases($query)
+    {
+        return $query->where('product_kind', 'mix_base');
+    }
+
+    /**
+     * Scope: Regular products (not mix bases).
+     */
+    public function scopeRegular($query)
+    {
+        return $query->where('product_kind', 'regular');
+    }
+
+    /**
+     * Get the mix builder bases pivot entries for this product.
+     */
+    public function mixBuilderBases()
+    {
+        return $this->hasMany(MixBuilderBase::class);
     }
 }
 

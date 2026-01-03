@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Core\Models\Modifier;
 use App\Core\Models\Product;
+use App\Core\Models\MixBuilderBase;
 
 class MixPriceCalculator
 {
@@ -223,11 +224,25 @@ class MixPriceCalculator
                 throw new \InvalidArgumentException('Base product not found or inactive.');
             }
 
+            // Validate base is a mix_base product
+            if ($baseProduct->product_kind !== 'mix_base') {
+                throw new \InvalidArgumentException('Base product must be of kind mix_base.');
+            }
+
+            // Validate base belongs to builder if builder_id is provided
+            $builderId = $configuration['builder_id'] ?? $configuration['mix_builder_id'] ?? null;
+            if ($builderId !== null) {
+                $this->validateBaseForBuilder($baseProduct->id, $builderId);
+            }
+
             return (float) $baseProduct->base_price;
         }
 
         // Fallback to base_price if provided (deprecated, for backward compatibility)
         if (isset($configuration['base_price']) && $configuration['base_price'] !== null) {
+            // Log warning for deprecated usage (in production, use logger)
+            // \Log::warning('Using deprecated base_price in mix configuration. Use base_id instead.');
+            
             $basePrice = (float) $configuration['base_price'];
             
             if ($basePrice < 0) {
@@ -239,6 +254,35 @@ class MixPriceCalculator
 
         // If neither is provided, throw exception
         throw new \InvalidArgumentException('Either base_id or base_price must be provided.');
+    }
+
+    /**
+     * Validate that a base product belongs to a specific builder.
+     *
+     * @param int $baseId
+     * @param int|null $builderId
+     * @throws \InvalidArgumentException
+     */
+    protected function validateBaseForBuilder(int $baseId, ?int $builderId): void
+    {
+        if ($builderId === null) {
+            // No builder specified, allow any mix_base product (global bases)
+            return;
+        }
+
+        // Check if base is assigned to this builder (or is global - mix_builder_id is null)
+        $isAssigned = MixBuilderBase::where('product_id', $baseId)
+            ->where(function ($query) use ($builderId) {
+                $query->where('mix_builder_id', $builderId)
+                      ->orWhereNull('mix_builder_id'); // Global bases (null) available to all builders
+            })
+            ->exists();
+
+        if (!$isAssigned) {
+            throw new \InvalidArgumentException(
+                "Base product {$baseId} is not assigned to builder {$builderId}."
+            );
+        }
     }
 
     /**

@@ -173,8 +173,10 @@ class CartController extends Controller
      * @bodyParam addons.*.modifier_id integer required Modifier ID assigned to product as addon. Example: 5
      * @bodyParam addons.*.level integer optional Modifier level (0 to max_level). Default: 1. Example: 2
      * @bodyParam configuration object required_if:item_type,mix,creator_mix Configuration snapshot for mix or creator_mix. Example: {"base_id":1,"modifiers":[{"id":2,"level":1}]}
-     * @bodyParam configuration.base_id integer optional Base product ID (preferred). Example: 1
+     * @bodyParam configuration.base_id integer optional Base product ID (preferred). Must be a product with product_kind = mix_base. Example: 1
      * @bodyParam configuration.base_price number optional Deprecated. Raw base price for backward compatibility. Example: 15.00
+     * @bodyParam configuration.builder_id integer optional Mix builder ID to validate base belongs to builder. Example: 1
+     * @bodyParam configuration.mix_builder_id integer optional Alias for builder_id. Example: 1
      * @bodyParam configuration.modifiers array optional Array of modifier configurations. Example: [{"id":2,"level":1}]
      * @bodyParam configuration.modifiers.*.id integer required Modifier ID. Example: 2
      * @bodyParam configuration.modifiers.*.level integer optional Modifier level (0 to max_level). Default: 1. Example: 1
