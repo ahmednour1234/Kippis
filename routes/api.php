@@ -29,6 +29,8 @@ Route::middleware('api.locale')->group(function () {
         // Authenticated routes
         Route::middleware('auth:api')->group(function () {
             Route::get('/me', [CustomerAuthController::class, 'me']);
+            Route::put('/me', [CustomerAuthController::class, 'update']);
+            Route::patch('/me', [CustomerAuthController::class, 'update']);
             Route::post('/logout', [CustomerAuthController::class, 'logout']);
             Route::post('/refresh-token', [CustomerAuthController::class, 'refreshToken']);
             Route::delete('/account', [CustomerAuthController::class, 'deleteAccount']);

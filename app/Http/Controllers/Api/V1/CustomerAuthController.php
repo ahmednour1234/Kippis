@@ -12,8 +12,11 @@ use App\Http\Requests\Api\V1\LoginCustomerRequest;
 use App\Http\Requests\Api\V1\RegisterCustomerRequest;
 use App\Http\Requests\Api\V1\ResetPasswordRequest;
 use App\Http\Requests\Api\V1\ResendOtpRequest;
+use App\Http\Requests\Api\V1\UpdateCustomerRequest;
 use App\Http\Resources\Api\V1\CustomerResource;
 use App\Http\Requests\Api\V1\VerifyCustomerRequest;
+use App\Core\Repositories\CustomerRepository;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -26,7 +29,8 @@ use Illuminate\Validation\ValidationException;
 class CustomerAuthController extends Controller
 {
     public function __construct(
-        private CustomerAuthService $authService
+        private CustomerAuthService $authService,
+        private CustomerRepository $customerRepository
     ) {
     }
 
@@ -518,6 +522,112 @@ class CustomerAuthController extends Controller
             );
         } catch (\Exception $e) {
             Log::error('Token refresh failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return apiError('SERVER_ERROR', 'server_error', 500);
+        }
+    }
+
+    /**
+     * Update customer profile.
+     *
+     * Update the authenticated customer's profile information. All fields are optional.
+     * If password is provided, it must be confirmed.
+     *
+     * @authenticated
+     *
+     * @header Authorization Bearer {token} JWT token obtained from login
+     *
+     * @bodyParam name string optional The customer's full name. Example: John Doe
+     * @bodyParam email string optional The customer's email address (must be unique). Example: john@example.com
+     * @bodyParam phone string optional The customer's phone number. Example: 1234567890
+     * @bodyParam country_code string optional The country code. Example: +1
+     * @bodyParam birthdate date optional The customer's birthdate (must be before today). Example: 1990-01-01
+     * @bodyParam avatar file optional Customer avatar image (max 2MB, jpeg/png/jpg/gif).
+     * @bodyParam password string optional The new password (minimum 8 characters). Example: newpassword123
+     * @bodyParam password_confirmation string required_if:password,* Password confirmation. Example: newpassword123
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "data": {
+     *     "id": 1,
+     *     "name": "John Doe",
+     *     "email": "john@example.com",
+     *     "phone": "1234567890",
+     *     "country_code": "+1",
+     *     "birthdate": "1990-01-01",
+     *     "avatar": "http://localhost/storage/customers/avatar.jpg",
+     *     "foodics_customer_id": null,
+     *     "is_verified": true,
+     *     "created_at": "2023-01-01 12:00:00",
+     *     "updated_at": "2023-01-01 12:00:00"
+     *   },
+     *   "message": "Profile updated successfully."
+     * }
+     *
+     * @response 401 {
+     *   "success": false,
+     *   "error": {
+     *     "code": "UNAUTHORIZED",
+     *     "message": "Unauthorized. Please login first."
+     *   }
+     * }
+     *
+     * @response 422 {
+     *   "success": false,
+     *   "error": {
+     *     "code": "VALIDATION_ERROR",
+     *     "message": "The given data was invalid.",
+     *     "errors": {
+     *       "email": ["The email has already been taken."]
+     *     }
+     *   }
+     * }
+     *
+     * @param UpdateCustomerRequest $request
+     * @return JsonResponse
+     */
+    public function update(UpdateCustomerRequest $request): JsonResponse
+    {
+        try {
+            $customer = auth('api')->user();
+
+            if (!$customer) {
+                return apiError('UNAUTHORIZED', 'unauthorized', 401);
+            }
+
+            $validated = $request->validated();
+            
+            // Handle avatar upload
+            if ($request->hasFile('avatar')) {
+                // Delete old avatar if exists
+                if ($customer->avatar) {
+                    Storage::disk('public')->delete($customer->avatar);
+                }
+                
+                // Store new avatar
+                $avatarPath = $request->file('avatar')->store('customers', 'public');
+                $validated['avatar'] = $avatarPath;
+            }
+
+            // Update customer (password will be hashed in repository if provided)
+            $updated = $this->customerRepository->update($customer->id, $validated);
+
+            if (!$updated) {
+                return apiError('UPDATE_FAILED', 'update_failed', 500);
+            }
+
+            // Refresh customer data
+            $customer->refresh();
+
+            return apiSuccess(
+                new CustomerResource($customer),
+                'profile_updated'
+            );
+        } catch (\Exception $e) {
+            Log::error('Customer profile update failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

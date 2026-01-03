@@ -66,6 +66,11 @@ class CustomerRepository
             return false;
         }
 
+        // Hash password if provided
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
         return $customer->update($data);
     }
 
