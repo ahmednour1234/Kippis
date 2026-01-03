@@ -71,7 +71,8 @@ class ProductAddonsRelationManager extends RelationManager
                     ->preloadRecordSelect()
                     ->recordSelectOptionsQuery(fn (Builder $query) => $query->active())
                     ->form(fn (Actions\AttachAction $action): array => [
-                        $action->getRecordSelect(),
+                        $action->getRecordSelect()
+                            ->getOptionLabelFromRecordUsing(fn (Modifier $record): string => $record->getName(app()->getLocale())),
                         Forms\Components\Toggle::make('is_required')
                             ->label('Required')
                             ->default(false),
