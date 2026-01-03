@@ -49,7 +49,7 @@ class RendersRelationManager extends RelationManager
                 // No create action - renders are created via API only
             ])
             ->actions([
-                Actions\ViewAction::make(),
+                // Read-only relation manager - no actions needed
             ])
             ->bulkActions([
                 // No bulk actions - read-only
