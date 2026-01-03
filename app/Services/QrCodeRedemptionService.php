@@ -159,7 +159,7 @@ class QrCodeRedemptionService
                         $wallet,
                         $lockedQrCode->points_awarded,
                         'earned',
-                        "Points from QR code: {$lockedQrCode->title ?? $lockedQrCode->code}",
+                        "Points from QR code: " . ($lockedQrCode->title ?? $lockedQrCode->code),
                         'qr_code',
                         $lockedQrCode->id
                     );
