@@ -62,6 +62,14 @@ Route::middleware('api.locale')->group(function () {
         Route::post('/preview', [\App\Http\Controllers\Api\V1\MixController::class, 'preview']);
     });
 
+    // ==================== FRAMES APIs ====================
+    Route::prefix('v1/frames')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Api\V1\FrameController::class, 'index']);
+        Route::middleware('auth:api')->group(function () {
+            Route::post('/render', [\App\Http\Controllers\Api\V1\FrameController::class, 'render']);
+        });
+    });
+
     // ==================== CART APIs ====================
     Route::prefix('v1/cart')->group(function () {
         Route::post('/init', [\App\Http\Controllers\Api\V1\CartController::class, 'init']);
