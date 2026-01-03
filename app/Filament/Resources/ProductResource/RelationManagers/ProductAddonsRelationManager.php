@@ -4,6 +4,7 @@ namespace App\Filament\Resources\ProductResource\RelationManagers;
 
 use App\Core\Models\Modifier;
 use App\Core\Models\ProductModifierGroup;
+use Filament\Actions;
 use Filament\Forms;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
@@ -61,10 +62,10 @@ class ProductAddonsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\AttachAction::make()
+                Actions\AttachAction::make()
                     ->preloadRecordSelect()
                     ->recordSelectOptionsQuery(fn (Builder $query) => $query->active())
-                    ->form(fn (Tables\Actions\AttachAction $action): array => [
+                    ->form(fn (Actions\AttachAction $action): array => [
                         $action->getRecordSelect(),
                         Forms\Components\Toggle::make('is_required')
                             ->label('Required')
@@ -91,11 +92,10 @@ class ProductAddonsRelationManager extends RelationManager
                                 'max_select' => $data['max_select'] ?? null,
                             ]
                         );
-                    })
-                    ->preloadRecordSelect(),
+                    }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
+                Actions\EditAction::make()
                     ->form([
                         Forms\Components\Toggle::make('is_required')
                             ->label('Required'),
@@ -118,11 +118,11 @@ class ProductAddonsRelationManager extends RelationManager
                                 'max_select' => $data['max_select'] ?? null,
                             ]);
                     }),
-                Tables\Actions\DetachAction::make(),
+                Actions\DetachAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DetachBulkAction::make(),
+                Actions\BulkActionGroup::make([
+                    Actions\DetachBulkAction::make(),
                 ]),
             ]);
     }
